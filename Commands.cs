@@ -30,8 +30,6 @@ public partial class TeamEnforcer
         }
 
         _queueManager?.JoinQueue(invoker);
-
-        return;
     }
 
     [ConsoleCommand("css_t")]
@@ -40,8 +38,6 @@ public partial class TeamEnforcer
         if (invoker == null || !invoker.IsReal() || invoker.Team != CsTeam.CounterTerrorist) return;
 
         _teamManager?.AddToLeaveList(invoker);
-
-        return;
     }
 
     [ConsoleCommand("css_noct")]
@@ -54,16 +50,21 @@ public partial class TeamEnforcer
         {
             _queueManager.LeaveQueue(invoker);
         }
-        return;
     }
 
     [ConsoleCommand("css_lq")]
     [ConsoleCommand("css_leavequeue")]
     public void OnLeaveQueueCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
     {
-        // Check if in a queue
-        // Remove from queue
-        return;
+        if (invoker == null || !invoker.IsReal()) return;
+
+        if (!_queueManager?.IsPlayerInQueue(invoker, out var _) ?? true)
+        {
+            _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.NotInQueue"]);
+            return;
+        }
+
+        _queueManager?.LeaveQueue(invoker);
     }
 
     [ConsoleCommand("css_vq")]
@@ -71,8 +72,6 @@ public partial class TeamEnforcer
     [ConsoleCommand("css_viewqueue")]
     public void OnViewQueueCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
     {
-        // Check if queue is empty
-        // Print queue
         // Print position if invoker in queue
         if (_queueManager?.IsQueueEmpty() ?? true)
         {
@@ -83,8 +82,10 @@ public partial class TeamEnforcer
         var queueStatus = _queueManager.GetQueueStatus();
 
         _messageService?.PrintMessage(invoker, queueStatus);
-        return;
-    }
 
-    
+        if (_queueManager.IsPlayerInQueue(invoker, out var playerQueueStatus))
+        {
+            _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.YourPlaceInQueue", playerQueueStatus?.queuePosition ?? -1, playerQueueStatus?.queueName ?? "Unknown Queue"]);
+        }
+    }
 }

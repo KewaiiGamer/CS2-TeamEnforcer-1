@@ -21,8 +21,11 @@ public class QueueManager(MessageService messageService, TeamEnforcer plugin)
     {
         if (player == null || !player.IsReal()) return;
 
-        if (_priorityQueue.Contains(player) || _mainQueue.Contains(player) || _lowPriorityQueue.Contains(player)) return;
-
+        if (_priorityQueue.Contains(player) || _mainQueue.Contains(player) || _lowPriorityQueue.Contains(player)){
+            IsPlayerInQueue(player, out var playerQueueStatus);
+            _messageService?.PrintMessage(player, _plugin.Localizer["TeamEnforcer.AlreadyInQueue", playerQueueStatus?.queuePosition ?? -1, playerQueueStatus?.queueName ?? "Unknown Queue"]);
+            return;
+        }
         switch(prio)
         {
             case QueuePriority.High:
@@ -113,32 +116,19 @@ public class QueueManager(MessageService messageService, TeamEnforcer plugin)
     public string GetQueueStatus()
     {
         // Assumes queue isnt empty, command checks that
-        var statusMessage = new StringBuilder($" Queue status:\u2029");
+        var statusMessage = new StringBuilder($"Queue status:");
         int count = 1;
         if (_mainQueue.Count == 0 && _lowPriorityQueue.Count == 0 && _priorityQueue.Count == 0) return "";
 
-        if (_priorityQueue.Count > 0)
+        var allPlayers = _priorityQueue.GetAllItems()
+            .Concat(_mainQueue.GetAllItems())
+            .Concat(_lowPriorityQueue.GetAllItems());
+
+        foreach (var player in allPlayers)
         {
-            foreach (var player in _priorityQueue.GetAllItems())
-            {
-                if (player == null || !player.IsReal()) continue;
-                statusMessage.Append($"#{count} - {player.PlayerName ?? "<John Doe>"}\u2029");
-                count++;
-            }
-
-            foreach (var player in _mainQueue.GetAllItems())
-            {
-                if (player == null || !player.IsReal()) continue;
-                statusMessage.Append($"#{count} - {player.PlayerName ?? "<John Doe>"}\u2029");
-                count++;
-            }
-
-            foreach (var player in _lowPriorityQueue.GetAllItems())
-            {
-                if (player == null || !player.IsReal()) continue;
-                statusMessage.Append($"#{count} - {player.PlayerName ?? "<John Doe>"}\u2029");
-                count++;
-            }
+            if (player == null || !player.IsReal()) continue;
+            statusMessage.Append($"\u2029{ChatColors.Green}#{count}{ChatColors.Default} - {player.PlayerName ?? "<John Doe>"}");
+            count++;
         }
 
         return statusMessage.ToString();

@@ -1,12 +1,12 @@
 {
     "TeamEnforcer.CannotJoinCt": "You cannot join the CT team directly, use {0} to join the queue.",
     "TeamEnforcer.CannotLeaveCt": "You cannot leave the CT team directly, use {0} to get moved at the end of the round.",
-    "TeamEnforcer.AlreadyInQueue": "You are already in the queue.",
+    "TeamEnforcer.AlreadyInQueue": "You are already in the queue. Position: {green}#{0}{default} In: {blue}{1}{default}.",
     "TeamEnforcer.JoinedQueue": "You have joined the queue.",
     "TeamEnforcer.NotInQueue": "You are not in the queue.",
     "TeamEnforcer.RemovedFromQueue": "You were removed from the queue.",
-    "TeamEnforcer.MustBeT": "You need to be a Terrorist to use this command",
-    "TeamEnforcer.MustBeCT": "You need to be a CT to use this command",
+    "TeamEnforcer.MustBeT": "You need to be a Terrorist to use this command.",
+    "TeamEnforcer.MustBeCT": "You need to be a CT to use this command.",
     "TeamEnforcer.AddedToPriorityQueue": "You have been added to the priority queue.",
     "TeamEnforcer.RandomTPromoted" : "{0} was chosen at random to be moved to CT.",
     "TeamEnforcer.TPromotedFromQueue" : "{0} was chosen from the queue to be moved to CT.",
@@ -16,7 +16,9 @@
     "TeamEnforcer.DemotedFromLeaversList": "You were removed from CT because you used the {0} command.",
     "TeamEnforcer.CannotJoinQueueFromNotT": "You must be in the Terrorist team to join the guard queue.",
     "TeamEnforcer.CtTeamEmptyInstantlyMoved": "The CT team is empty so you were moved instantly.",
-    "TeamEnforcer.AddedToLeaveList": "You were added to the list of leavers, you will be moved next round",
-    "TeamEnforcer.AddedToNoCTList": "You were added to the no CT list. You will not be chosen randomly to join CT.",
-    "TeamEnforcer.QueueEmpty": "The queue is currently empty, use the {0} command to join it"
+    "TeamEnforcer.AddedToLeaveList": "You were added to the list of leavers, you will be moved next round.",
+    "TeamEnforcer.AddedToNoCTList": "You were added to the no-CT list. You will not be chosen randomly to join CT.",
+    "TeamEnforcer.AlreadyInNoCTList": "You are already in the no-CT list. You will not be chosen randomly to join CT.",
+    "TeamEnforcer.QueueEmpty": "The queue is currently empty, use the {0} command to join it.",
+    "TeamEnforcer.YourPlaceInQueue": "Position: {green}#{0}{default} In: {blue}{1}{default}."
 }

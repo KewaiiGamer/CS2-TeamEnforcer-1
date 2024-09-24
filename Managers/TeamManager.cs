@@ -41,7 +41,8 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         {
             if (leaver == null || !leaver.IsReal()) continue;
             _leaveCtList.Remove(leaver);
-            
+            if (leaver.Team == CsTeam.Terrorist) continue;
+
             DemoteToT(leaver);
             _messageService.PrintMessage(leaver, _plugin.Localizer["TeamEnforcer.DemotedFromLeaversList", "!t"]);
         }
@@ -171,7 +172,11 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
 
         if (player.Team != CsTeam.Terrorist) return;
 
-        if (_noCtList.Contains(player)) return;
+        if (_noCtList.Contains(player))
+        {
+            _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.AlreadyInNoCTList"]);
+            return;
+        }
 
         _noCtList.Add(player);
         _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.AddedToNoCTList"]);
