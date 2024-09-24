@@ -11,4 +11,11 @@ public partial class TeamEnforcer
         _teamManager?.BalanceTeams();
         return HookResult.Continue;
     }
+
+    [GameEventHandler]
+    public HookResult OnWarmupEnd(EventWarmupEnd @event, GameEventInfo eventInfo)
+    {
+        _teamManager?.BalanceTeams();
+        return HookResult.Continue;
+    }
 }

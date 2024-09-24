@@ -174,5 +174,6 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         if (_noCtList.Contains(player)) return;
 
         _noCtList.Add(player);
+        _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.AddedToNoCTList"]);
     }
 }

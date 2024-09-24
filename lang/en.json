@@ -16,5 +16,7 @@
     "TeamEnforcer.DemotedFromLeaversList": "You were removed from CT because you used the {0} command.",
     "TeamEnforcer.CannotJoinQueueFromNotT": "You must be in the Terrorist team to join the guard queue.",
     "TeamEnforcer.CtTeamEmptyInstantlyMoved": "The CT team is empty so you were moved instantly.",
-    "TeamEnforcer.AddedToLeaveList": "You were added to the list of leavers, you will be moved next round"
+    "TeamEnforcer.AddedToLeaveList": "You were added to the list of leavers, you will be moved next round",
+    "TeamEnforcer.AddedToNoCTList": "You were added to the no CT list. You will not be chosen randomly to join CT.",
+    "TeamEnforcer.QueueEmpty": "The queue is currently empty, use the {0} command to join it"
 }

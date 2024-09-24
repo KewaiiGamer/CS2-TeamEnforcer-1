@@ -1,3 +1,4 @@
+using System.Text;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using TeamEnforcer.Collections;
@@ -103,6 +104,44 @@ public class QueueManager(MessageService messageService, TeamEnforcer plugin)
         }
 
         return nextList;
+    }
+    public bool IsQueueEmpty()
+    {
+        if (_lowPriorityQueue.Count == 0 && _priorityQueue.Count == 0 && _mainQueue.Count == 0) return true;
+        return false;
+    }
+    public string GetQueueStatus()
+    {
+        // Assumes queue isnt empty, command checks that
+        var statusMessage = new StringBuilder($" Queue status:\u2029");
+        int count = 1;
+        if (_mainQueue.Count == 0 && _lowPriorityQueue.Count == 0 && _priorityQueue.Count == 0) return "";
+
+        if (_priorityQueue.Count > 0)
+        {
+            foreach (var player in _priorityQueue.GetAllItems())
+            {
+                if (player == null || !player.IsReal()) continue;
+                statusMessage.Append($"#{count} - {player.PlayerName ?? "<John Doe>"}\u2029");
+                count++;
+            }
+
+            foreach (var player in _mainQueue.GetAllItems())
+            {
+                if (player == null || !player.IsReal()) continue;
+                statusMessage.Append($"#{count} - {player.PlayerName ?? "<John Doe>"}\u2029");
+                count++;
+            }
+
+            foreach (var player in _lowPriorityQueue.GetAllItems())
+            {
+                if (player == null || !player.IsReal()) continue;
+                statusMessage.Append($"#{count} - {player.PlayerName ?? "<John Doe>"}\u2029");
+                count++;
+            }
+        }
+
+        return statusMessage.ToString();
     }
 }
 

@@ -47,8 +47,13 @@ public partial class TeamEnforcer
     [ConsoleCommand("css_noct")]
     public void OnNoctCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
     {
-        // Prevent from being added to queue
-        // Remove from queue if they are in it
+        if (invoker == null || !invoker.IsReal()) return;
+
+        _teamManager?.JoinNoCtList(invoker);
+        if (_queueManager?.IsPlayerInQueue(invoker, out var _) ?? false)
+        {
+            _queueManager.LeaveQueue(invoker);
+        }
         return;
     }
 
@@ -69,6 +74,15 @@ public partial class TeamEnforcer
         // Check if queue is empty
         // Print queue
         // Print position if invoker in queue
+        if (_queueManager?.IsQueueEmpty() ?? true)
+        {
+            _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.QueueEmpty", "!guard"]);
+            return;
+        }
+
+        var queueStatus = _queueManager.GetQueueStatus();
+
+        _messageService?.PrintMessage(invoker, queueStatus);
         return;
     }
 

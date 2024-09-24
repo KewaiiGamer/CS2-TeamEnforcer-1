@@ -15,14 +15,14 @@ public class MessageService(string pluginPrefix)
         { MsgType.Error, ChatColors.Red }
     };
     
-    private readonly string _pluginPrefix = pluginPrefix;
+    public readonly string PluginPrefix = pluginPrefix;
 
     public void PrintMessage(CCSPlayerController? player, string message, MsgType type = MsgType.Normal)
     {
         if (player == null || !player.IsReal()) return;
 
         
-        var fullMessage = new StringBuilder(_pluginPrefix)
+        var fullMessage = new StringBuilder(PluginPrefix)
             .Append($" {messageColors.GetValueOrDefault(type, ChatColors.Default)}")
             .Append(message)
             .Append($"{ChatColors.Default}");
@@ -32,7 +32,7 @@ public class MessageService(string pluginPrefix)
 
     public void PrintToAll(string message, MsgType type = MsgType.Normal)
     {
-        var fullMessage = new StringBuilder(_pluginPrefix)
+        var fullMessage = new StringBuilder(PluginPrefix)
             .Append($" {messageColors.GetValueOrDefault(type, ChatColors.Default)}")
             .Append(message)
             .Append($"{ChatColors.Default}");
