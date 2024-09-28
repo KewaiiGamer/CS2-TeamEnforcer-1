@@ -8,11 +8,11 @@
     "TeamEnforcer.MustBeT": "You need to be a Terrorist to use this command.",
     "TeamEnforcer.MustBeCT": "You need to be a CT to use this command.",
     "TeamEnforcer.AddedToPriorityQueue": "You have been added to the priority queue.",
-    "TeamEnforcer.RandomTPromoted" : "{0} was chosen at random to be moved to CT.",
-    "TeamEnforcer.TPromotedFromQueue" : "{0} was chosen from the queue to be moved to CT.",
+    "TeamEnforcer.RandomTPromoted" : "{blue}{0}{default} was chosen at random to be moved to CT.",
+    "TeamEnforcer.TPromotedFromQueue" : "{blue}{0}{default} was chosen from the queue to be moved to CT.",
     "TeamEnforcer.NotEnoughTsAvailable": "Unable to find enough Ts to join CT. Team balance is off.",
-    "TeamEnforcer.DemotedJoinedIllegitimately": "You were removed from CT because you did not join the team through the queue.",
-    "TeamEnforcer.DemotedFromStack": "You were the lastest CT to join, so you have been chosen to be removed back to T.",
+    "TeamEnforcer.PlayerDemotedJoinedIllegitimately": "{blue}{0}{default} was removed from CT because they did not join through legit means.",
+    "TeamEnforcer.PlayerDemotedFromStack": "There are too many CTs, {0} was the lastest CT to join so he was chosen to be removed back to T.",
     "TeamEnforcer.DemotedFromLeaversList": "You were removed from CT because you used the {0} command.",
     "TeamEnforcer.CannotJoinQueueFromNotT": "You must be in the Terrorist team to join the guard queue.",
     "TeamEnforcer.CtTeamEmptyInstantlyMoved": "The CT team is empty so you were moved instantly.",
@@ -20,5 +20,7 @@
     "TeamEnforcer.AddedToNoCTList": "You were added to the no-CT list. You will not be chosen randomly to join CT.",
     "TeamEnforcer.AlreadyInNoCTList": "You are already in the no-CT list. You will not be chosen randomly to join CT.",
     "TeamEnforcer.QueueEmpty": "The queue is currently empty, use the {0} command to join it.",
-    "TeamEnforcer.YourPlaceInQueue": "Position: {green}#{0}{default} In: {blue}{1}{default}."
+    "TeamEnforcer.YourPlaceInQueue": "Your Position: {green}#{0}{default}",
+    "TeamEnforcer.PlayersInQueueLiteral": "Players in the queue:",
+    "TeamEnforcer.AlreadyInLeaveList": "You are already in the leavers list, you will be moved next round."
 }

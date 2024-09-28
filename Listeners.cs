@@ -11,6 +11,10 @@ public partial class TeamEnforcer
     public void RegisterListeners()
     {
         AddCommandListener("jointeam", OnJoinTeamCommand);
+
+        if (_teamManager != null) RegisterListener<Listeners.OnMapEnd>(_teamManager.PrepareForNewMap);
+
+        _messageService?.PrintToConsole("Registered Listeners");
     }
 
     public HookResult OnJoinTeamCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
@@ -31,9 +35,9 @@ public partial class TeamEnforcer
         {
             _messageService?.PrintMessage(
                 invoker,
-                Localizer["TeamEnforcer.CannotLeaveCt", $"{ChatColors.Blue}!t{ChatColors.Default}"],
-                MsgType.Error
+                Localizer["TeamEnforcer.CannotLeaveCt", $"{ChatColors.Blue}!t{ChatColors.Default}"]
             );
+            _teamManager?.AddToLeaveList(invoker);
             return HookResult.Handled;
         }
 

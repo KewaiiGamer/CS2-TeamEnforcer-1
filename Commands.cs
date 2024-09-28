@@ -25,7 +25,7 @@ public partial class TeamEnforcer
         if (ctCount == 0)
         {
             _teamManager?.PromoteToCt(invoker);
-            _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.CtTeamEmptyInstantlyMoved"]);
+            commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.CtTeamEmptyInstantlyMoved"]) ?? "");
             return;
         }
 
@@ -45,11 +45,18 @@ public partial class TeamEnforcer
     {
         if (invoker == null || !invoker.IsReal()) return;
 
+        if (invoker.Team == CsTeam.CounterTerrorist)
+        {
+            commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.MustBeT"]) ?? "");
+            return;
+        }
+
         _teamManager?.JoinNoCtList(invoker);
         if (_queueManager?.IsPlayerInQueue(invoker, out var _) ?? false)
         {
             _queueManager.LeaveQueue(invoker);
         }
+        
     }
 
     [ConsoleCommand("css_lq")]
@@ -60,7 +67,7 @@ public partial class TeamEnforcer
 
         if (!_queueManager?.IsPlayerInQueue(invoker, out var _) ?? true)
         {
-            _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.NotInQueue"]);
+            commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.NotInQueue"]) ?? "");
             return;
         }
 
@@ -75,17 +82,17 @@ public partial class TeamEnforcer
         // Print position if invoker in queue
         if (_queueManager?.IsQueueEmpty() ?? true)
         {
-            _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.QueueEmpty", "!guard"]);
+            commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.QueueEmpty", "!guard"]) ?? "");
             return;
         }
 
-        var queueStatus = _queueManager.GetQueueStatus();
-
-        _messageService?.PrintMessage(invoker, queueStatus);
-
         if (_queueManager.IsPlayerInQueue(invoker, out var playerQueueStatus))
         {
-            _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.YourPlaceInQueue", playerQueueStatus?.queuePosition ?? -1, playerQueueStatus?.queueName ?? "Unknown Queue"]);
+            commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.YourPlaceInQueue", playerQueueStatus?.queuePosition ?? -1]) ?? "");
         }
+
+        var queueStatus = _queueManager?.GetQueueStatus();
+
+        commandInfo.ReplyToCommand(_messageService?.GetMessageString(queueStatus ?? "") ?? "");
     }
 }

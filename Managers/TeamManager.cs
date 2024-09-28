@@ -1,7 +1,6 @@
-using System.Runtime.Versioning;
+using System.Text;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
 using TeamEnforcer.Helpers;
 using TeamEnforcer.Services;
@@ -23,13 +22,26 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
     private readonly HashSet<CCSPlayerController> legitCtJoins = [];
     private readonly List<CCSPlayerController> _leaveCtList = [];
 
+    public void PrepareForNewMap()
+    {
+        _queueManager.ClearQueues();
+        _noCtList.Clear();
+        legitCtJoins.Clear();
+        ctJoinOrder.Clear();
+        _leaveCtList.Clear();
+    }
+    
     public void AddToLeaveList(CCSPlayerController? player)
     {
         if (player == null || !player.IsReal()) return;
 
         if (player.Team != CsTeam.CounterTerrorist) return;
 
-        if (_leaveCtList.Contains(player)) return;
+        if (_leaveCtList.Contains(player))
+        {
+            _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.AlreadyInLeaveList"]);
+            return;
+        }
 
         _leaveCtList.Add(player);
         _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.AddedToLeaveList"]);
@@ -37,15 +49,8 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
     
     public void BalanceTeams()
     {
-        foreach (var leaver in _leaveCtList)
-        {
-            if (leaver == null || !leaver.IsReal()) continue;
-            _leaveCtList.Remove(leaver);
-            if (leaver.Team == CsTeam.Terrorist) continue;
-
-            DemoteToT(leaver);
-            _messageService.PrintMessage(leaver, _plugin.Localizer["TeamEnforcer.DemotedFromLeaversList", "!t"]);
-        }
+        RemoveLeavers();
+        DemoteAnyIllegitimateCts();
 
         int playersPromoted = 0;
         
@@ -55,6 +60,8 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         int ctCount = players.FindAll(p => p.Team == CsTeam.CounterTerrorist).Count;
 
         int idealCtCount = (int) (totalCtandT * ctRatio);
+
+        if (idealCtCount <= 0) idealCtCount = 1;
         
         if (ctCount < idealCtCount)
         {
@@ -63,6 +70,7 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
 
             foreach (var player in promotionList)
             {
+                if (player == null || !player.IsReal()) continue;
                 PromoteToCt(player);
                 _messageService.PrintToAll(_plugin.Localizer["TeamEnforcer.TPromotedFromQueue", player.PlayerName ?? "<John Doe>"]);
                 playersPromoted++;
@@ -87,23 +95,11 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         }
         else if (ctCount > idealCtCount)
         {
-            int demotionsNeeded = idealCtCount - ctCount;
+            int demotionsNeeded = ctCount - idealCtCount;
 
             int demotedCount = 0;
-            var illegitimateCts = Utilities.GetPlayers().FindAll(p => p.Team == CsTeam.CounterTerrorist && !legitCtJoins.Contains(p));
 
-            if (illegitimateCts.Count >= demotionsNeeded)
-            {
-                var illegitimateCtsToDemote = illegitimateCts.Take(demotionsNeeded);
-                foreach (var ct in illegitimateCts)
-                {
-                    if (ct == null || !ct.IsReal()) continue;
-
-                    DemoteToT(ct);
-                    _messageService.PrintMessage(ct, _plugin.Localizer["TeamEnforcer.DemotedJoinedIllegitimately"]);
-                    demotedCount++;
-                }
-            }
+            demotedCount += DemoteAnyIllegitimateCts(demotionsNeeded);
 
             while (ctJoinOrder.Count >= 0 && demotedCount < demotionsNeeded)
             {
@@ -112,10 +108,63 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
                 if (nextCt == null || !nextCt.IsReal() || nextCt.Team != CsTeam.CounterTerrorist) continue;
 
                 DemoteToT(nextCt);
-                _messageService.PrintMessage(nextCt, _plugin.Localizer["TeamEnforcer.DemotedFromStack"]);
+                _queueManager.JoinQueue(nextCt, QueuePriority.High);
+                _messageService.PrintToAll(_plugin.Localizer["TeamEnforcer.PlayerDemotedFromStack", nextCt.PlayerName ?? "<John Doe>"]);
                 demotedCount++;
             }
         }
+    }
+
+    public void RemoveLeavers()
+    {
+        List<CCSPlayerController> successFulLeavers = [];
+        foreach (var leaver in _leaveCtList)
+        {
+            if (leaver == null || !leaver.IsReal()) continue;
+            if (leaver.Team == CsTeam.Terrorist) continue;
+
+            successFulLeavers.Add(leaver);
+            DemoteToT(leaver);
+            JoinNoCtList(leaver);
+            _messageService.PrintMessage(leaver, _plugin.Localizer["TeamEnforcer.DemotedFromLeaversList", "!t"]);
+        }
+
+        foreach (var leaver in successFulLeavers)
+        {
+            _leaveCtList.Remove(leaver);
+        }
+    }
+
+    public int DemoteAnyIllegitimateCts(int demotionsNeeded = 999)
+    {
+        var demotedCount = 0;
+        var illegitimateCts = Utilities.GetPlayers().FindAll(p => p.Team == CsTeam.CounterTerrorist && !legitCtJoins.Contains(p));
+
+        if (demotedCount < demotionsNeeded)
+        {
+            var illegitimateCtsToDemote = illegitimateCts.Take(demotionsNeeded);
+            foreach (var ct in illegitimateCts)
+            {
+                if (ct == null || !ct.IsReal()) continue;
+
+                DemoteToT(ct);
+                _messageService.PrintToAll(_plugin.Localizer["TeamEnforcer.PlayerDemotedJoinedIllegitimately", ct.PlayerName ?? "<John Doe>"]);
+                demotedCount++;
+            }
+        }
+
+        return demotedCount;
+    }
+
+    public string GetLegitCtsString()
+    {
+        var message = new StringBuilder($"Legit joins ({legitCtJoins.Count}):");
+        foreach (var player in legitCtJoins)
+        {  
+            if (player == null || !player.IsReal()) continue;
+            message.Append($"- {player.PlayerName ?? "<John Doe>"}");
+        }
+        return message.ToString();
     }
 
     public void DemoteToT(CCSPlayerController? player)
@@ -135,6 +184,11 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
 
         if (player.Team == CsTeam.CounterTerrorist) return;
 
+        if (_queueManager.IsPlayerInQueue(player, out var _))
+        {
+            _queueManager.LeaveQueue(player);
+        }
+
         ctJoinOrder.Push(player);
         legitCtJoins.Add(player);
         player.SwitchTeam(CsTeam.CounterTerrorist);
@@ -149,6 +203,11 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         {
             var teamsPlayers = Utilities.GetPlayers()
                 .FindAll(p => p != null && p.IsReal() && p.Team == team);
+
+            if (team == CsTeam.Terrorist)
+            {
+                teamsPlayers = teamsPlayers.FindAll(p => !_noCtList.Contains(p));
+            }
 
             while(randomsList.Count < count && teamsPlayers.Count > 0)
             {
@@ -165,7 +224,7 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
 
         return randomsList;
     }
-    
+
     public void JoinNoCtList(CCSPlayerController? player)
     {
         if (player == null || !player.IsReal()) return;

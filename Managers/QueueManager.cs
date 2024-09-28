@@ -16,6 +16,17 @@ public class QueueManager(MessageService messageService, TeamEnforcer plugin)
     private readonly CustomQueue<CCSPlayerController> _mainQueue = new("Main Queue");
     private readonly CustomQueue<CCSPlayerController> _lowPriorityQueue = new("Low Priority Queue");
 
+    public void ClearQueues()
+    {
+        _priorityQueue.Clear();
+        _mainQueue.Clear();
+        _lowPriorityQueue.Clear();
+    }
+    
+    public int GetQueueCount()
+    {
+        return _priorityQueue.Count + _mainQueue.Count + _lowPriorityQueue.Count;
+    }
 
     public void JoinQueue(CCSPlayerController? player, QueuePriority prio = QueuePriority.Normal)
     {
@@ -74,14 +85,16 @@ public class QueueManager(MessageService messageService, TeamEnforcer plugin)
             {"Low Priority Queue", _lowPriorityQueue}, 
         };
 
+        var queuePos = 0;
         foreach (var queue in queues)
         {
             if (queue.Value.Contains(player))
             {
                 status.queueName = queue.Key;
-                status.queuePosition = queue.Value.GetQueuePosition(player);
+                status.queuePosition = queuePos + queue.Value.GetQueuePosition(player);
                 return true;
             }
+            queuePos += queue.Value.Count;
         }
 
         return false;
@@ -116,7 +129,7 @@ public class QueueManager(MessageService messageService, TeamEnforcer plugin)
     public string GetQueueStatus()
     {
         // Assumes queue isnt empty, command checks that
-        var statusMessage = new StringBuilder($"Queue status:");
+        var statusMessage = new StringBuilder(_plugin.Localizer["TeamEnforcer.PlayersInQueueLiteral"]);
         int count = 1;
         if (_mainQueue.Count == 0 && _lowPriorityQueue.Count == 0 && _priorityQueue.Count == 0) return "";
 
