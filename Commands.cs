@@ -28,7 +28,12 @@ public partial class TeamEnforcer
             commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.CtTeamEmptyInstantlyMoved"]) ?? "");
             return;
         }
-
+        
+        if (_teamManager?.WasCtLastMap(invoker) ?? false)
+        {
+            _queueManager?.JoinQueue(invoker, Managers.QueuePriority.Low);
+            return;
+        }
         _queueManager?.JoinQueue(invoker);
     }
 

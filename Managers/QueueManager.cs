@@ -45,7 +45,7 @@ public class QueueManager(MessageService messageService, TeamEnforcer plugin)
                 break;
             case QueuePriority.Low:
                 _lowPriorityQueue.Enqueue(player);
-                _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.JoinedQueue"]);
+                _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.AddedToLowPriorityQueue"]);
                 break;
             default:
                 _mainQueue.Enqueue(player);

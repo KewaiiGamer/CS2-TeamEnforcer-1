@@ -22,5 +22,7 @@
     "TeamEnforcer.QueueEmpty": "The queue is currently empty, use the {0} command to join it.",
     "TeamEnforcer.YourPlaceInQueue": "Your Position: {green}#{0}{default}",
     "TeamEnforcer.PlayersInQueueLiteral": "Players in the queue:",
-    "TeamEnforcer.AlreadyInLeaveList": "You are already in the leavers list, you will be moved next round."
+    "TeamEnforcer.AlreadyInLeaveList": "You are already in the leavers list, you will be moved next round.",
+    "TeamEnforcer.AddedToMapCtList": "You were added to this map's ct list, you will have a lower priority when joining the CT team next map.",
+    "TeamEnforcer.AddedToLowPriorityQueue": "You were added to the Low Priority queue. You were a CT in the last map."
 }

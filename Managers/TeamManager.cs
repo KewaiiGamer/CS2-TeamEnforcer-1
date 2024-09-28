@@ -22,13 +22,21 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
     private readonly HashSet<CCSPlayerController> legitCtJoins = [];
     private readonly List<CCSPlayerController> _leaveCtList = [];
 
-    public void PrepareForNewMap()
+    private readonly List<ulong> _ctsThisMap = [];
+    private List<ulong> _ctsLastMap = [];
+    private readonly Dictionary<CCSPlayerController, int> _ctRoundCount = [];
+
+    public void PrepareForNewMap(string mapName = "")
     {
         _queueManager.ClearQueues();
         _noCtList.Clear();
+        _leaveCtList.Clear();
         legitCtJoins.Clear();
         ctJoinOrder.Clear();
-        _leaveCtList.Clear();
+
+        _ctsLastMap = new(_ctsThisMap);
+        _ctsThisMap.Clear();
+        _ctRoundCount.Clear();
     }
     
     public void AddToLeaveList(CCSPlayerController? player)
@@ -47,10 +55,10 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.AddedToLeaveList"]);
     }
     
-    public void BalanceTeams()
+    public void BalanceTeams(bool warmupEnd)
     {
         RemoveLeavers();
-        DemoteAnyIllegitimateCts();
+        DemoteAnyIllegitimateCts(warmupEnd);
 
         int playersPromoted = 0;
         
@@ -99,7 +107,7 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
 
             int demotedCount = 0;
 
-            demotedCount += DemoteAnyIllegitimateCts(demotionsNeeded);
+            demotedCount += DemoteAnyIllegitimateCts(false, demotionsNeeded);
 
             while (ctJoinOrder.Count >= 0 && demotedCount < demotionsNeeded)
             {
@@ -113,6 +121,19 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
                 demotedCount++;
             }
         }
+    }
+
+    public bool WasCtLastMap(CCSPlayerController? player)
+    {
+        if (player == null || !player.IsReal()) return false;
+
+        var steamId = player.SteamID;
+        if (_ctsLastMap.Contains(steamId))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     public void RemoveLeavers()
@@ -135,7 +156,7 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         }
     }
 
-    public int DemoteAnyIllegitimateCts(int demotionsNeeded = 999)
+    public int DemoteAnyIllegitimateCts(bool warmupEnd, int demotionsNeeded = 999)
     {
         var demotedCount = 0;
         var illegitimateCts = Utilities.GetPlayers().FindAll(p => p.Team == CsTeam.CounterTerrorist && !legitCtJoins.Contains(p));
@@ -148,7 +169,10 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
                 if (ct == null || !ct.IsReal()) continue;
 
                 DemoteToT(ct);
-                _messageService.PrintToAll(_plugin.Localizer["TeamEnforcer.PlayerDemotedJoinedIllegitimately", ct.PlayerName ?? "<John Doe>"]);
+                if (!warmupEnd)
+                {
+                    _messageService.PrintToAll(_plugin.Localizer["TeamEnforcer.PlayerDemotedJoinedIllegitimately", ct.PlayerName ?? "<John Doe>"]);
+                }
                 demotedCount++;
             }
         }
@@ -193,6 +217,37 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         legitCtJoins.Add(player);
         player.SwitchTeam(CsTeam.CounterTerrorist);
         player.CommitSuicide(false, true);
+    }
+
+    public void UpdateMapCtList()
+    {
+        var cts = Utilities.GetPlayers().FindAll(p => p != null && p.IsReal() && p.Team == CsTeam.CounterTerrorist);
+
+        foreach (var ct in cts)
+        {
+            if (ct == null || !ct.IsReal()) continue;
+
+            if(!_ctRoundCount.TryGetValue(ct, out int roundCount))
+            {
+                if (!_ctRoundCount.ContainsKey(ct))
+                {
+                    _ctRoundCount[ct] = 0;
+                }
+            }
+
+            if (roundCount >= _plugin.Config.RoundsInCtToLowPrio)
+            {
+                var steamId = ct.SteamID;
+
+                if (!_ctsThisMap.Contains(steamId))
+                {
+                    _ctsThisMap.Add(steamId);
+                    _messageService.PrintMessage(ct, _plugin.Localizer["TeamEnforcer.AddedToMapCtList"]);
+                }
+            }
+
+            _ctRoundCount[ct] += 1;
+        }
     }
 
     public List<CCSPlayerController> GetRandoms(int count, CsTeam team)

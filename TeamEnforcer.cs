@@ -6,15 +6,16 @@ using TeamEnforcer.Services;
 
 namespace TeamEnforcer;
 
-public partial class TeamEnforcer : BasePlugin
+public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig>
 {
     public override string ModuleName => "TeamEnforcer";
     public override string ModuleVersion => "v0.0.1";
 
+    public TeamEnforcerConfig Config { get; set; } = new();
+
     private MessageService? _messageService;
     private QueueManager? _queueManager;
     private TeamManager? _teamManager;
-    private TeamEnforcerConfig? Config;
 
     public override void Load(bool hotReload)
     {
@@ -41,6 +42,11 @@ public partial class TeamEnforcer : BasePlugin
     {
         if (config.ChatMessagePrefix == "")
             config.ChatMessagePrefix = $" {ChatColors.DarkBlue}[{ChatColors.LightBlue}TeamEnforcer{ChatColors.DarkBlue}]{ChatColors.Default}";
+
+        if (config.RoundsInCtToLowPrio < 0)
+        {
+            config.RoundsInCtToLowPrio = 0;
+        }
 
         Config = config;
 

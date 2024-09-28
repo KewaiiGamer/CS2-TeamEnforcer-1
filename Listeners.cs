@@ -12,7 +12,7 @@ public partial class TeamEnforcer
     {
         AddCommandListener("jointeam", OnJoinTeamCommand);
 
-        if (_teamManager != null) RegisterListener<Listeners.OnMapEnd>(_teamManager.PrepareForNewMap);
+        if (_teamManager != null) RegisterListener<Listeners.OnMapStart>(_teamManager.PrepareForNewMap);
 
         _messageService?.PrintToConsole("Registered Listeners");
     }
@@ -25,8 +25,7 @@ public partial class TeamEnforcer
         {
             _messageService?.PrintMessage(
                 invoker,
-                Localizer["TeamEnforcer.CannotJoinCt", $"{ChatColors.Blue}!guard{ChatColors.Default}"],
-                MsgType.Error
+                Localizer["TeamEnforcer.CannotJoinCt", $"{ChatColors.Blue}!guard{ChatColors.Default}"]
             );
             return HookResult.Handled;
         }
