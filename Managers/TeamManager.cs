@@ -7,8 +7,9 @@ using TeamEnforcer.Services;
 
 namespace TeamEnforcer.Managers;
 
-public class TeamManager(QueueManager queueManager, MessageService messageService, TeamEnforcer plugin)
+public class TeamManager(QueueManager queueManager, MessageService messageService, TeamEnforcer plugin, CTBanService? _CTBanService)
 {
+    private readonly CTBanService? _ctBanService = _CTBanService;
     public readonly MessageService _messageService = messageService;
     public readonly TeamEnforcer _plugin = plugin;
 
@@ -57,6 +58,7 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
     
     public void BalanceTeams(bool warmupEnd)
     {
+        RemoveCTBannedPlayers();
         RemoveLeavers();
         DemoteAnyIllegitimateCts(warmupEnd);
 
@@ -122,6 +124,19 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
             }
         }
     }
+
+    public void RemoveCTBannedPlayers()
+    {
+        if (_ctBanService == null) return;
+
+        var ctBannedPlayers = Utilities.GetPlayers().FindAll(p => p != null && p.IsReal() && p.Team == CsTeam.CounterTerrorist && _ctBanService.PlayerIsCTBanned(p));
+
+        foreach (var player in ctBannedPlayers)
+        {
+            DemoteToT(player);
+            _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.RemovedCtBanned"]);
+        }
+    }   
 
     public bool WasCtLastMap(CCSPlayerController? player)
     {
@@ -269,7 +284,8 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
                 var randomIndex = _random.Next(teamsPlayers.Count);
                 var randomPlayer = teamsPlayers[randomIndex];
 
-                if (randomPlayer != null && randomPlayer.IsReal())
+                var ctBanned = _ctBanService?.PlayerIsCTBanned(randomPlayer) ?? false;
+                if (randomPlayer != null && randomPlayer.IsReal() && !ctBanned)
                 {
                     randomsList.Add(randomPlayer);
                     teamsPlayers.RemoveAt(randomIndex);

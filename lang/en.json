@@ -24,5 +24,12 @@
     "TeamEnforcer.PlayersInQueueLiteral": "Players in the queue:",
     "TeamEnforcer.AlreadyInLeaveList": "You are already in the leavers list, you will be moved next round.",
     "TeamEnforcer.AddedToMapCtList": "You were added to this map's ct list, you will have a lower priority when joining the CT team next map.",
-    "TeamEnforcer.AddedToLowPriorityQueue": "You were added to the Low Priority queue. You were a CT in the last map."
+    "TeamEnforcer.AddedToLowPriorityQueue": "You were added to the Low Priority queue. You were a CT in the last map.",
+    "TeamEnforcer.CTBanUnavailable": "CTBan features are unavailable. Notify server administrator.",
+    "TeamEnforcer.InvalidTarget": "Invalid target. Usage: {0}",
+    "TeamEnforcer.TargetNotFound": "Unable to find target: {0}",
+    "TeamEnforcer.AlreadyBanned": "{0} is already CTBanned.",
+    "TeamEnforcer.BanSuccess": "{0} has been CTBanned. Duration: {1}",
+    "TeamEnforcer.CtBannedMessage": "You are currently CTBanned and cannot join the CT team.",
+    "TeamEnforcer.RemovedCtBanned": "You were removed from the CT team because you are CTBanned."
 }

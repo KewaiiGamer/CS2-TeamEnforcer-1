@@ -20,20 +20,46 @@ public partial class TeamEnforcer
             return;
         }
         
+        // Check if the player is CT-banned
+        bool isCtBanned = false;
+
+        if (CTBanService != null)
+        {
+            isCtBanned = CTBanService.PlayerIsCTBanned(invoker);
+        } 
+
+        if (isCtBanned)
+        {   
+            // Notify the player that they are CT-banned and cannot join CT
+            Server.NextFrame(() => {
+                _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.CtBannedMessage"]);
+            });
+            return;
+        }
+
+        if (invoker.Team != CsTeam.Terrorist)
+        {
+            Server.NextFrame(() => {
+                _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.CannotJoinQueueFromNotT"]);
+            });
+            return;
+        }
+
         var ctCount = Utilities.GetPlayers().FindAll(p => p != null && p.IsReal() && p.Team == CsTeam.CounterTerrorist).Count;
 
         if (ctCount == 0)
         {
             _teamManager?.PromoteToCt(invoker);
-            commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.CtTeamEmptyInstantlyMoved"]) ?? "");
+            _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.CtTeamEmptyInstantlyMoved"]);
             return;
         }
-        
+
         if (_teamManager?.WasCtLastMap(invoker) ?? false)
         {
             _queueManager?.JoinQueue(invoker, Managers.QueuePriority.Low);
             return;
         }
+
         _queueManager?.JoinQueue(invoker);
     }
 

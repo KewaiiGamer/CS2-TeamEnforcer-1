@@ -1,6 +1,8 @@
 ﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Utils;
+using Microsoft.Extensions.Logging;
+using MySqlConnector;
 using TeamEnforcer.Managers;
 using TeamEnforcer.Services;
 
@@ -16,6 +18,10 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
     private MessageService? _messageService;
     private QueueManager? _queueManager;
     private TeamManager? _teamManager;
+
+    private string DbConnectionString = string.Empty;
+    private static Database? Database;
+    private static CTBanService? CTBanService;
 
     public override void Load(bool hotReload)
     {
@@ -48,11 +54,36 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
             config.RoundsInCtToLowPrio = 0;
         }
 
+        // I took this check and dbstring code from CS2-SimpleAdmin @ https://github.com/daffyyyy/CS2-SimpleAdmin
+        if (config.DatabaseHost.Length < 1 || config.DatabaseName.Length < 1 || config.DatabaseUser.Length < 1)
+        {
+            Logger.LogCritical("[TeamEnforcer] You need to setup Database credentials in config to use CTBan Feature!");
+        }
+        else
+        {
+            MySqlConnectionStringBuilder builder = new()
+            {
+                Server = config.DatabaseHost,
+                Database = config.DatabaseName,
+                UserID = config.DatabaseUser,
+                Password = config.DatabasePassword,
+                Port = (uint)config.DatabasePort,
+                Pooling = true,
+                MinimumPoolSize = 0,
+                MaximumPoolSize = 640,
+            };
+
+            DbConnectionString = builder.ConnectionString;
+            Database = new Database(DbConnectionString, this);
+            CTBanService = new CTBanService(Database);
+            CTBanService.CreateTables();
+        }
+
         Config = config;
 
         _messageService = new(Config.ChatMessagePrefix);
         _queueManager = new(_messageService, this);
-        _teamManager = new(_queueManager, _messageService, this);
+        _teamManager = new(_queueManager, _messageService, this, CTBanService);
     }
 
     public override void Unload(bool hotReload)
