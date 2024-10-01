@@ -1,3 +1,4 @@
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using MySqlConnector;
 using TeamEnforcer.Helpers;
@@ -115,7 +116,9 @@ public class CTBanService(Database db)
         WHERE `player_steamid` = @playerSteamId AND `active` = TRUE;
         """, connection);
 
-        command.Parameters.AddWithValue("@playerSteamId", player.SteamID);
+        await Server.NextFrameAsync(() => {
+            command.Parameters.AddWithValue("@playerSteamId", player.SteamID);
+        });
 
         using var reader = await command.ExecuteReaderAsync();
 
@@ -149,7 +152,9 @@ public class CTBanService(Database db)
         WHERE `player_steamid` = @playerSteamId AND `active` = TRUE;
         """, connection);
 
-        command.Parameters.AddWithValue("@playerSteamId", player.SteamID);
+        await Server.NextFrameAsync(() => {
+            command.Parameters.AddWithValue("@playerSteamId", player.SteamID);
+        });
 
         using var reader = await command.ExecuteReaderAsync();
 

@@ -28,11 +28,14 @@
     "TeamEnforcer.CTBanUnavailable": "CTBan features are unavailable. Notify server administrator.",
     "TeamEnforcer.InvalidTarget": "Invalid target. Usage: {0}",
     "TeamEnforcer.TargetNotFound": "Unable to find target: {0}",
-    "TeamEnforcer.AlreadyBanned": "{0} is already CTBanned.",
+    "TeamEnforcer.AlreadyBanned": "{blue}{0}{default} is already CTBanned.",
     "TeamEnforcer.BanSuccess": "{blue}{0}{default} has been CTBanned. Duration: {1}",
-    "TeamEnforcer.CtBannedMessage": "You are currently CTBanned and cannot join the CT team.",
+    "TeamEnforcer.CTBannedTempMessage": "You are currently CTBanned and cannot join the CT team. Your ctban expires in {green}{0} minutes{default}.",
+    "TeamEnforcer.CTBannedPermMessage": "You are {red}permanently{default} banned from joining the CT team.",
     "TeamEnforcer.RemovedCtBanned": "You were removed from the CT team because you are CTBanned.",
     "TeamEnforcer.UnbanSuccess": "{blue}{0}{default} is no longer CTBanned.",
-    "TeamEnforcer.NotCTBanned": "{blue}{0}{default} is currently not CTBanned.",
-    "TeamEnforcer.TeamManagerUnavailable": "TeamManager service is null/unavailable."
+    "TeamEnforcer.NotCTBanned": "{blue}{0}{default} does not have an active CTBan.",
+    "TeamEnforcer.TeamManagerUnavailable": "TeamManager service is null/unavailable.",
+    "TeamEnforcer.PlayerForcedToCT": "{blue}{0}{default} was forced into the CT team by {blue}{1}{default}",
+    "TeamEnforcer.RemovedBecauseCTBanned": "{blue}{0}{default} was removed because they are CTBanned."
 }

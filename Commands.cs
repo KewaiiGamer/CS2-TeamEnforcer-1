@@ -11,6 +11,7 @@ public partial class TeamEnforcer
 {
     [ConsoleCommand("css_ct")]
     [ConsoleCommand("css_guard")]
+    [CommandHelper(minArgs: 0, usage: "", whoCanExecute: CommandUsage.CLIENT_ONLY)]
     public void OnGuardCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
     {
         if (invoker == null || !invoker.IsReal()) return;
@@ -35,16 +36,52 @@ public partial class TeamEnforcer
             return;
         }
 
-        if (_teamManager?.WasCtLastMap(invoker) ?? false)
+        if (_ctBanService == null)
         {
-            _queueManager?.JoinQueue(invoker, Managers.QueuePriority.Low);
+            var queuePrio = _teamManager?.WasCtLastMap(invoker)?? false ? Managers.QueuePriority.Low : Managers.QueuePriority.Normal;
+            _queueManager?.JoinQueue(invoker, queuePrio);
             return;
         }
 
-        _queueManager?.JoinQueue(invoker);
+        Task.Run(async () => {
+            var isCtBanned = await _ctBanService.PlayerIsCTBannedAsync(invoker);
+            if (isCtBanned)
+            {
+                var banStatus = await _ctBanService.GetCTBanInfoAsync(invoker);
+                if (banStatus == null) return;
+
+                var banIsPermanent = banStatus.ExpirationDate == null;
+
+                if (banIsPermanent)
+                {
+                    Server.NextFrame(() => {
+                        invoker.PrintToChat(_messageService?.GetMessageString(Localizer["TeamEnforcer.CTBannedPermMessage"]) ?? "[TeamEnforcer] You are permanently banned from CT so you cannot join the queue.");
+                    });
+                    return;
+                }
+
+                TimeSpan? timeLeft = banStatus.ExpirationDate - DateTime.UtcNow;
+                int minutesLeft = 0;
+                if (timeLeft != null)
+                {
+                    minutesLeft = Math.Max(0, (int)timeLeft.Value.TotalMinutes);
+                }
+                Server.NextFrame(() => {
+                    invoker.PrintToChat(_messageService?.GetMessageString(Localizer["TeamEnforcer.CTBannedTempMessage", minutesLeft]) ?? $"You are currently CTBanned and cannot join the CT team. Your ban will expire in {minutesLeft} minutes");
+                });
+                return;
+            }
+
+            Server.NextFrame(() => {
+                var queuePrio = _teamManager?.WasCtLastMap(invoker)?? false ? Managers.QueuePriority.Low : Managers.QueuePriority.Normal;
+                _queueManager?.JoinQueue(invoker, queuePrio);
+            });
+            return;
+        });
     }
 
     [ConsoleCommand("css_t")]
+    [CommandHelper(minArgs: 0, usage: "", whoCanExecute: CommandUsage.CLIENT_ONLY)]
     public void OnTCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
     {
         if (invoker == null || !invoker.IsReal() || invoker.Team != CsTeam.CounterTerrorist) return;
@@ -53,6 +90,7 @@ public partial class TeamEnforcer
     }
 
     [ConsoleCommand("css_noct")]
+    [CommandHelper(minArgs: 0, usage: "", whoCanExecute: CommandUsage.CLIENT_ONLY)]
     public void OnNoctCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
     {
         if (invoker == null || !invoker.IsReal()) return;
@@ -73,6 +111,7 @@ public partial class TeamEnforcer
 
     [ConsoleCommand("css_lq")]
     [ConsoleCommand("css_leavequeue")]
+    [CommandHelper(minArgs: 0, usage: "", whoCanExecute: CommandUsage.CLIENT_ONLY)]
     public void OnLeaveQueueCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
     {
         if (invoker == null || !invoker.IsReal()) return;
@@ -89,6 +128,7 @@ public partial class TeamEnforcer
     [ConsoleCommand("css_vq")]
     [ConsoleCommand("css_queue")]
     [ConsoleCommand("css_viewqueue")]
+    [CommandHelper(minArgs: 0, usage: "", whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
     public void OnViewQueueCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
     {
         // Print position if invoker in queue

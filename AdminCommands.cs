@@ -11,7 +11,7 @@ namespace TeamEnforcer;
 
 public partial class TeamEnforcer
 {
-# if DEBUG
+    # if DEBUG
     [ConsoleCommand("css_legitjoins")]
     [CommandHelper(minArgs: 0, usage: "", whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
     [RequiresPermissions("@css/generic")]
@@ -21,7 +21,7 @@ public partial class TeamEnforcer
 
         commandInfo.ReplyToCommand(msg ?? "Unable to find list.");
     }
-# endif
+    # endif
 
     [ConsoleCommand("css_ctban")]
     [CommandHelper(minArgs: 1, usage: "<player_name> [duration] [reason]", whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
@@ -84,7 +84,7 @@ public partial class TeamEnforcer
                 Active = true
             };
 
-            try 
+            try
             {
                 await _ctBanService.BanPlayerAsync(newBan);
                 Server.NextFrame(() => {
@@ -93,6 +93,7 @@ public partial class TeamEnforcer
                         _messageService?.GetMessageString(Localizer["TeamEnforcer.BanSuccess", targetPlayer.PlayerName, durationString])
                         ?? $"[TeamEnforcer] {targetPlayer.PlayerName} was CTBanned. Duration: {durationString}"
                     );
+                    _teamManager?.DemoteToT(targetPlayer);
                 });
             }
             catch
@@ -165,8 +166,8 @@ public partial class TeamEnforcer
             catch
             {
                 Server.NextFrame(() => {
-                    invoker?.PrintToChat("[TeamEnforcer] Error while unbanning player asynchronously");
-                    Logger.LogCritical("[TeamEnforcer] Error while unbanning player asynchronously");
+                    invoker?.PrintToChat("[TeamEnforcer] Error while unbanning player asynchronously.");
+                    Logger.LogCritical("[TeamEnforcer] Error while unbanning player asynchronously.");
                 });
             }
         });

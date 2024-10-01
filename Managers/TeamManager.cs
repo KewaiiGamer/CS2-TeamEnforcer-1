@@ -7,9 +7,10 @@ using TeamEnforcer.Services;
 
 namespace TeamEnforcer.Managers;
 
-public class TeamManager(QueueManager queueManager, MessageService messageService, TeamEnforcer plugin)
+public class TeamManager(QueueManager queueManager, MessageService messageService, TeamEnforcer plugin, CTBanService? ctBanService)
 {
     public readonly MessageService _messageService = messageService;
+    public readonly CTBanService? _ctBanService = ctBanService;
     public readonly TeamEnforcer _plugin = plugin;
 
     private readonly Random _random = new();
@@ -67,6 +68,7 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
     
     public void BalanceTeams(bool warmupEnd)
     {
+        RemoveCTBannedCTs();
         RemoveLeavers();
         DemoteAnyIllegitimateCts(warmupEnd);
 
@@ -144,6 +146,17 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         }
 
         return false;
+    }
+
+    public void RemoveCTBannedCTs()
+    {
+        if (_ctBanService == null) return;
+        var ctBannedCTs = Utilities.GetPlayers().FindAll(p => p != null && p.IsReal() && p.Team == CsTeam.CounterTerrorist && _ctBanService.PlayerIsCTBanned(p));
+        foreach (var ct in ctBannedCTs)
+        {
+            DemoteToT(ct);
+            _messageService.PrintToAll(_plugin.Localizer["TeamEnforcer.RemovedBecauseCTBanned", ct.PlayerName]);
+        }
     }
 
     public void RemoveLeavers()
@@ -279,7 +292,8 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
                 var randomIndex = _random.Next(teamsPlayers.Count);
                 var randomPlayer = teamsPlayers[randomIndex];
 
-                if (randomPlayer != null && randomPlayer.IsReal())
+                var isCtBanned = _ctBanService?.PlayerIsCTBanned(randomPlayer) ?? false;
+                if (randomPlayer != null && randomPlayer.IsReal() && !isCtBanned)
                 {
                     randomsList.Add(randomPlayer);
                     teamsPlayers.RemoveAt(randomIndex);

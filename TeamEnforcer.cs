@@ -16,9 +16,9 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
     public TeamEnforcerConfig Config { get; set; } = new();
 
     private MessageService? _messageService;
-    private CTBanService? _ctBanService;
     private QueueManager? _queueManager;
     private TeamManager? _teamManager;
+    private CTBanService? _ctBanService;
 
     private string DbConnectionString = string.Empty;
     private static Database? Database;
@@ -83,7 +83,7 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
 
         _messageService = new(Config.ChatMessagePrefix);
         _queueManager = new(_messageService, this);
-        _teamManager = new(_queueManager, _messageService, this);
+        _teamManager = new(_queueManager, _messageService, this, _ctBanService);
     }
 
     public override void Unload(bool hotReload)
