@@ -4,8 +4,9 @@ using MySqlConnector;
 namespace TeamEnforcer;
 
 // I took this code from CS2-SimpleAdmin @ https://github.com/daffyyyy/CS2-SimpleAdmin
-public class Database(string dbConnectionString, TeamEnforcer _plugin)
+public class Database(string dbConnectionString, ILogger logger)
 {
+    private readonly ILogger _logger = logger;
     public MySqlConnection GetConnection()
     {
         try
@@ -16,7 +17,7 @@ public class Database(string dbConnectionString, TeamEnforcer _plugin)
         }
         catch (Exception ex)
         {
-            _plugin.Logger.LogCritical("Unable to connect to database: {message}", ex.Message);
+            _logger.LogCritical("Unable to connect to database: {message}", ex.Message);
             throw;
         }
     }
@@ -31,7 +32,7 @@ public class Database(string dbConnectionString, TeamEnforcer _plugin)
         }
         catch (Exception ex)
         {
-            _plugin.Logger.LogCritical("Unable to connect to database: {message}", ex.Message);
+            _logger.LogCritical("Unable to connect to database: {message}", ex.Message);
             throw;
         }
     }

@@ -16,12 +16,12 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
     public TeamEnforcerConfig Config { get; set; } = new();
 
     private MessageService? _messageService;
+    private CTBanService? _ctBanService;
     private QueueManager? _queueManager;
     private TeamManager? _teamManager;
 
     private string DbConnectionString = string.Empty;
     private static Database? Database;
-    private static CTBanService? CTBanService;
 
     public override void Load(bool hotReload)
     {
@@ -74,16 +74,16 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
             };
 
             DbConnectionString = builder.ConnectionString;
-            Database = new Database(DbConnectionString, this);
-            CTBanService = new CTBanService(Database);
-            CTBanService.CreateTables();
+            Database = new Database(DbConnectionString, Logger);
+            _ctBanService = new(Database);
+            _ctBanService.CreateTables();
         }
 
         Config = config;
 
         _messageService = new(Config.ChatMessagePrefix);
         _queueManager = new(_messageService, this);
-        _teamManager = new(_queueManager, _messageService, this, CTBanService);
+        _teamManager = new(_queueManager, _messageService, this);
     }
 
     public override void Unload(bool hotReload)

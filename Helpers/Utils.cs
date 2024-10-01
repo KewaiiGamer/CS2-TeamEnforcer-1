@@ -13,7 +13,7 @@ public class Utils
         {
             if (player == null || !player.IsReal()) continue;
 
-            if (player.PlayerName.Contains(target))
+            if (player.PlayerName.Contains(target, StringComparison.CurrentCultureIgnoreCase))
             {
                 return player;
             }

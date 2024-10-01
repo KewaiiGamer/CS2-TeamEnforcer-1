@@ -22,8 +22,7 @@ public class CTBanService(Database db)
             `ban_reason` VARCHAR(255) NOT NULL,
             `ban_date` DATETIME NOT NULL,
             `expiration_date` DATETIME NULL,
-            `active` BOOL NOT NULL,
-             CONSTRAINT UC_PlayerActiveBan UNIQUE (`player_steamid`, `active`)
+            `active` BOOL NOT NULL
         );
         """, connection);
 
@@ -261,5 +260,3 @@ public enum BanRemoveReason
     Expired,
     StaffRevoke
 }
-
-

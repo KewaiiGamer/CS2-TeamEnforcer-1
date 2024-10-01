@@ -8,6 +8,7 @@ namespace TeamEnforcer;
 
 public partial class TeamEnforcer
 {
+    Dictionary<CCSPlayerController, DateTime> lastJoinAttempt = []; 
     public void RegisterListeners()
     {
         AddCommandListener("jointeam", OnJoinTeamCommand);
@@ -23,20 +24,38 @@ public partial class TeamEnforcer
 
         if (commandInfo.ArgByIndex(1) == "3") // Trying to join CT
         {
-            _messageService?.PrintMessage(
-                invoker,
-                Localizer["TeamEnforcer.CannotJoinCt", $"{ChatColors.Blue}!guard{ChatColors.Default}"]
-            );
+            // Allow only every 3 seconds so no sound and chat spam.
+            if (!lastJoinAttempt.TryGetValue(invoker, out DateTime value) || DateTime.Now > value.AddSeconds(3))
+            {
+                _messageService?.PrintMessage(
+                    invoker,
+                    Localizer["TeamEnforcer.CannotJoinCt", $"{ChatColors.Blue}!guard{ChatColors.Default}"]
+                );
+                invoker.ExecuteClientCommand($"play sounds/ui/menu_invalid.vsnd_c");
+            }
+            lastJoinAttempt[invoker] = DateTime.Now;
+
             return HookResult.Handled;
         }
 
         if (commandInfo.ArgByIndex(1) == "2" && invoker.Team == CsTeam.CounterTerrorist) // Trying to join T from CT
         {
-            _messageService?.PrintMessage(
-                invoker,
-                Localizer["TeamEnforcer.CannotLeaveCt", $"{ChatColors.Blue}!t{ChatColors.Default}"]
-            );
-            _teamManager?.AddToLeaveList(invoker);
+            // Allow only every 3 seconds so no sound and chat spam.
+            if (!lastJoinAttempt.TryGetValue(invoker, out DateTime value) || DateTime.Now > value.AddSeconds(3))
+            {
+                if (_teamManager?.IsInLeaveList(invoker) ?? false)
+                {
+                    invoker.ExecuteClientCommand($"play sounds/ui/menu_invalid.vsnd_c");
+                    _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.AlreadyInLeaveList"]);
+                }
+                else
+                {
+                    invoker.ExecuteClientCommand($"play sounds/ui/menu_invalid.vsnd_c");
+                    _teamManager?.AddToLeaveList(invoker);
+                }
+            }
+            lastJoinAttempt[invoker] = DateTime.Now;
+
             return HookResult.Handled;
         }
 

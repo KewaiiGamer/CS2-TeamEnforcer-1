@@ -20,28 +20,9 @@ public partial class TeamEnforcer
             return;
         }
         
-        // Check if the player is CT-banned
-        bool isCtBanned = false;
-
-        if (CTBanService != null)
-        {
-            isCtBanned = CTBanService.PlayerIsCTBanned(invoker);
-        } 
-
-        if (isCtBanned)
-        {   
-            // Notify the player that they are CT-banned and cannot join CT
-            Server.NextFrame(() => {
-                _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.CtBannedMessage"]);
-            });
-            return;
-        }
-
         if (invoker.Team != CsTeam.Terrorist)
         {
-            Server.NextFrame(() => {
-                _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.CannotJoinQueueFromNotT"]);
-            });
+            _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.CannotJoinQueueFromNotT"]);
             return;
         }
 
