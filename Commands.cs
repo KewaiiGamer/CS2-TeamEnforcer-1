@@ -3,6 +3,7 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Utils;
+using Microsoft.Extensions.Logging;
 using TeamEnforcer.Helpers;
 
 namespace TeamEnforcer;
@@ -15,11 +16,14 @@ public partial class TeamEnforcer
     public void OnGuardCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
     {
         if (invoker == null || !invoker.IsReal()) return;
+        
         if (invoker.Team != CsTeam.Terrorist)
         {
             _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.CannotJoinQueueFromNotT"]);
             return;
         }
+
+        Logger.LogInformation("[TeamEnforcer] {invoker} used !ct. Timestamp: {date}", invoker.PlayerName, DateTime.UtcNow);
         
         if (invoker.Team != CsTeam.Terrorist)
         {
@@ -87,6 +91,8 @@ public partial class TeamEnforcer
     {
         if (invoker == null || !invoker.IsReal() || invoker.Team != CsTeam.CounterTerrorist) return;
 
+        Logger.LogInformation("[TeamEnforcer] {invoker} used !t. Timestamp: {date}", invoker.PlayerName, DateTime.UtcNow);
+
         _teamManager?.AddToLeaveList(invoker);
     }
 
@@ -101,6 +107,8 @@ public partial class TeamEnforcer
             commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.MustBeT"]) ?? "");
             return;
         }
+
+        Logger.LogInformation("[TeamEnforcer] {invoker} used !noct. Timestamp: {date}", invoker.PlayerName, DateTime.UtcNow);
 
         _teamManager?.JoinNoCtList(invoker);
         if (_queueManager?.IsPlayerInQueue(invoker, out var _) ?? false)
@@ -122,7 +130,7 @@ public partial class TeamEnforcer
             commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.NotInQueue"]) ?? "");
             return;
         }
-
+        Logger.LogInformation("[TeamEnforcer] {invoker} used !leavequeue. Timestamp: {date}", invoker.PlayerName, DateTime.UtcNow);
         _queueManager?.LeaveQueue(invoker);
     }
 
@@ -145,7 +153,7 @@ public partial class TeamEnforcer
         }
 
         var queueStatus = _queueManager?.GetQueueStatus();
-
+        
         commandInfo.ReplyToCommand(_messageService?.GetMessageString(queueStatus ?? "") ?? "");
     }
 }
