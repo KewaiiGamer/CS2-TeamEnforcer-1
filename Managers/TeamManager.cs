@@ -2,6 +2,7 @@ using System.Text;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
+using Microsoft.Extensions.Logging;
 using TeamEnforcer.Helpers;
 using TeamEnforcer.Services;
 
@@ -46,6 +47,8 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
 
         if (player.Team != CsTeam.CounterTerrorist) return;
 
+        _plugin.Logger.LogInformation("[TeamEnforcer] Adding {player} to leavers list.", player.PlayerName);
+
         if (_leaveCtList.Contains(player))
         {
             return;
@@ -68,6 +71,8 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
     
     public void BalanceTeams(bool warmupEnd)
     {
+        _plugin.Logger.LogInformation("[TeamEnforcer] Balancing teams.");
+
         RemoveCTBannedCTs();
         RemoveLeavers();
         DemoteAnyIllegitimateCts(warmupEnd);
@@ -85,6 +90,8 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         
         if (ctCount < idealCtCount)
         {
+            Console.WriteLine("[TeamEnforcer] Not enough CTs, getting more.");
+
             var promotionsNeeded = idealCtCount - ctCount;
             List<CCSPlayerController> promotionList = _queueManager.GetNextInQueue(promotionsNeeded);
 
@@ -115,13 +122,15 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         }
         else if (ctCount > idealCtCount)
         {
+            Console.WriteLine("[TeamEnforcer] Too many CTs, removing some.");
+
             int demotionsNeeded = ctCount - idealCtCount;
 
             int demotedCount = 0;
 
             demotedCount += DemoteAnyIllegitimateCts(false, demotionsNeeded);
 
-            while (ctJoinOrder.Count >= 0 && demotedCount < demotionsNeeded)
+            while (ctJoinOrder.Count > 0 && demotedCount < demotionsNeeded)
             {
                 var nextCt = ctJoinOrder.Pop();
 
@@ -150,6 +159,8 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
 
     public void RemoveCTBannedCTs()
     {
+        _plugin.Logger.LogInformation("[TeamEnforcer] Removing CTBanned cts.");
+
         if (_ctBanService == null) return;
         var ctBannedCTs = Utilities.GetPlayers().FindAll(p => p != null && p.IsReal() && p.Team == CsTeam.CounterTerrorist && _ctBanService.PlayerIsCTBanned(p));
         foreach (var ct in ctBannedCTs)
@@ -161,6 +172,8 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
 
     public void RemoveLeavers()
     {
+        _plugin.Logger.LogInformation("[TeamEnforcer] Removing CT leavers.");
+
         List<CCSPlayerController> successFulLeavers = [];
         foreach (var leaver in _leaveCtList)
         {
@@ -181,13 +194,15 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
 
     public int DemoteAnyIllegitimateCts(bool warmupEnd, int demotionsNeeded = 999)
     {
+        _plugin.Logger.LogInformation("[TeamEnforcer] Removing illegitimate CTs.");
+
         var demotedCount = 0;
         var illegitimateCts = Utilities.GetPlayers().FindAll(p => p.Team == CsTeam.CounterTerrorist && !legitCtJoins.Contains(p));
 
         if (demotedCount < demotionsNeeded)
         {
             var illegitimateCtsToDemote = illegitimateCts.Take(demotionsNeeded);
-            foreach (var ct in illegitimateCts)
+            foreach (var ct in illegitimateCtsToDemote)
             {
                 if (ct == null || !ct.IsReal()) continue;
 
@@ -219,6 +234,8 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         if (player == null || !player.IsReal()) return;
 
         if (player.Team == CsTeam.Terrorist) return;
+
+        _plugin.Logger.LogInformation("[TeamEnforcer] Demoting {player} to T.", player.PlayerName);
 
         legitCtJoins.Remove(player);
         player.SwitchTeam(CsTeam.Terrorist);
@@ -275,29 +292,29 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
 
     public List<CCSPlayerController> GetRandoms(int count, CsTeam team)
     {
+        _plugin.Logger.LogInformation("[TeamEnforcer] Getting random T's to join CT.");
+
         List<CCSPlayerController> randomsList = new(count);
+        var teamsPlayers = Utilities.GetPlayers()
+            .FindAll(p => p != null && p.IsReal() && p.Team == team);
 
-        if (randomsList.Count < count)
+        if (team == CsTeam.Terrorist)
         {
-            var teamsPlayers = Utilities.GetPlayers()
-                .FindAll(p => p != null && p.IsReal() && p.Team == team);
+            teamsPlayers = teamsPlayers.FindAll(p => !_noCtList.Contains(p));
+        }
 
-            if (team == CsTeam.Terrorist)
+        var attempts = 0;
+        while(randomsList.Count < count && teamsPlayers.Count > 0 && attempts < 50)
+        {
+            attempts ++;
+            var randomIndex = _random.Next(teamsPlayers.Count);
+            var randomPlayer = teamsPlayers[randomIndex];
+
+            var isCtBanned = _ctBanService?.PlayerIsCTBanned(randomPlayer) ?? false;
+            if (randomPlayer != null && randomPlayer.IsReal() && !isCtBanned)
             {
-                teamsPlayers = teamsPlayers.FindAll(p => !_noCtList.Contains(p));
-            }
-
-            while(randomsList.Count < count && teamsPlayers.Count > 0)
-            {
-                var randomIndex = _random.Next(teamsPlayers.Count);
-                var randomPlayer = teamsPlayers[randomIndex];
-
-                var isCtBanned = _ctBanService?.PlayerIsCTBanned(randomPlayer) ?? false;
-                if (randomPlayer != null && randomPlayer.IsReal() && !isCtBanned)
-                {
-                    randomsList.Add(randomPlayer);
-                    teamsPlayers.RemoveAt(randomIndex);
-                }
+                randomsList.Add(randomPlayer);
+                teamsPlayers.RemoveAt(randomIndex);
             }
         }
 

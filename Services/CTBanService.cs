@@ -208,9 +208,7 @@ public class CTBanService(Database db)
 
             if (expirationDate.HasValue && expirationDate.Value <= DateTime.Now)
             {
-                Task.Run(async () => {
-                    await MarkBanAsExpiredAsync(banId);
-                });
+                Task.Run(() => MarkBanAsExpiredAsync(banId));
                 return false;
             }
 

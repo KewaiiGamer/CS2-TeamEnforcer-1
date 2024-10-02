@@ -42,10 +42,14 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
             _messageService?.PrintToConsole("Convar 'mp_autoteambalance' has been set to 'false'");
         });
 
+        Console.WriteLine("[TeamEnforcer] Loaded plugin.");
+
     }
 
     public void OnConfigParsed(TeamEnforcerConfig config)
     {
+        Console.WriteLine("[TeamEnforcer] Parsing config ...");
+
         if (config.ChatMessagePrefix == "")
             config.ChatMessagePrefix = $" {ChatColors.DarkBlue}[{ChatColors.LightBlue}TeamEnforcer{ChatColors.DarkBlue}]{ChatColors.Default}";
 
@@ -73,10 +77,18 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
                 MaximumPoolSize = 640,
             };
 
+            Console.WriteLine("[TeamEnforcer] Connecting to database.");
+
             DbConnectionString = builder.ConnectionString;
-            Database = new Database(DbConnectionString, Logger);
-            _ctBanService = new(Database);
-            _ctBanService.CreateTables();
+            try {
+                Database = new Database(DbConnectionString, Logger);
+                _ctBanService = new(Database);
+                _ctBanService.CreateTables();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[TeamEnforcer] An error occured while obtaining database instance. Message: {msg}", ex);
+            }
         }
 
         Config = config;
@@ -84,6 +96,8 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
         _messageService = new(Config.ChatMessagePrefix);
         _queueManager = new(_messageService, this);
         _teamManager = new(_queueManager, _messageService, this, _ctBanService);
+
+        Console.WriteLine("[TeamEnforcer] Services and managers instanced.");
     }
 
     public override void Unload(bool hotReload)

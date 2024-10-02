@@ -29,7 +29,8 @@ public partial class TeamEnforcer
 
         var ctCount = Utilities.GetPlayers().FindAll(p => p != null && p.IsReal() && p.Team == CsTeam.CounterTerrorist).Count;
 
-        if (ctCount == 0)
+        var isCtBanned = _ctBanService?.PlayerIsCTBanned(invoker) ?? false;
+        if (ctCount == 0 && !isCtBanned)
         {
             _teamManager?.PromoteToCt(invoker);
             _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.CtTeamEmptyInstantlyMoved"]);
@@ -64,7 +65,7 @@ public partial class TeamEnforcer
                 int minutesLeft = 0;
                 if (timeLeft != null)
                 {
-                    minutesLeft = Math.Max(0, (int)timeLeft.Value.TotalMinutes);
+                    minutesLeft = Math.Max(0, (int)Math.Round(timeLeft.Value.TotalMinutes));
                 }
                 Server.NextFrame(() => {
                     invoker.PrintToChat(_messageService?.GetMessageString(Localizer["TeamEnforcer.CTBannedTempMessage", minutesLeft]) ?? $"You are currently CTBanned and cannot join the CT team. Your ban will expire in {minutesLeft} minutes");
