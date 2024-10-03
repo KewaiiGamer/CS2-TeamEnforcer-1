@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
+      attestations: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -83,3 +85,19 @@ jobs:
           asset_path: ./publish/TeamEnforcer-${{ steps.new_version.outputs.NEW_VERSION }}.zip
           asset_name: TeamEnforcer-${{ steps.new_version.outputs.NEW_VERSION }}.zip
           asset_content_type: application/zip
+
+      - name: Generate Attestation
+        id: generate-attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: './publish/TeamEnforcer-${{ steps.new_version.outputs.NEW_VERSION }}.zip'
+
+      - name: Upload Attestation
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.generate-attestation.outputs.bundle-path }}
+          asset_name: TeamEnforcer-${{ steps.new_version.outputs.NEW_VERSION }}-attestation.jsonl
+          asset_content_type: application/json
