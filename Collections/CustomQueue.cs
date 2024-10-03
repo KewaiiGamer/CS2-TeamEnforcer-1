@@ -1,6 +1,3 @@
-
-using System.Reflection.Metadata.Ecma335;
-
 namespace TeamEnforcer.Collections;
 
 internal class CustomQueue<T>(string name = "Nameless Queue") where T : notnull 

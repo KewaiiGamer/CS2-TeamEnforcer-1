@@ -23,5 +23,22 @@
     "TeamEnforcer.YourPlaceInQueue": "A tua posição: {green}#{0}{default}",
     "TeamEnforcer.PlayersInQueueLiteral": "Jogadores na fila:",
     "TeamEnforcer.AlreadyInLeaveList": "Já estás na lista de saídas, serás movido na próxima ronda.",
-    "TeamEnforcer.AddedToMapCtList": "Foste adicionado à lista de CT deste mapa, terás uma prioridade mais baixa ao juntar-te à equipa CT no próximo mapa."
+    "TeamEnforcer.AddedToMapCtList": "Foste adicionado à lista de CT deste mapa, terás uma prioridade mais baixa ao juntar-te à equipa CT no próximo mapa.",
+    "TeamEnforcer.AddedToLowPriorityQueue": "Foste adicionado à fila de Baixa Prioridade. Foste um CT no último mapa.",
+    "TeamEnforcer.CTBanUnavailable": "As funcionalidades de CTBan estão indisponíveis. Notifica o administrador do servidor.",
+    "TeamEnforcer.InvalidTarget": "Alvo inválido. Uso: {0}",
+    "TeamEnforcer.TargetNotFound": "Não foi possível encontrar o alvo: {0}",
+    "TeamEnforcer.AlreadyBanned": "{blue}{0}{default} já está CTBanned.",
+    "TeamEnforcer.BanSuccess": "{blue}{0}{default} foi CTBanned. Duração: {1}",
+    "TeamEnforcer.CTBannedTempMessage": "Estás atualmente CTBanned e não podes juntar-te à equipa CT. O teu CTBan expira em {green}{0} minutos{default}.",
+    "TeamEnforcer.CTBannedPermMessage": "Estás {red}permanentemente{default} CTBanned de te juntares à equipa CT.",
+    "TeamEnforcer.RemovedCtBanned": "Foste removido da equipa CT porque estás CTBanned.",
+    "TeamEnforcer.UnbanSuccess": "{blue}{0}{default} já não está CTBanned.",
+    "TeamEnforcer.NotCTBanned": "{blue}{0}{default} não tem um CTBan ativo.",
+    "TeamEnforcer.TeamManagerUnavailable": "O serviço TeamManager está nulo/indisponível.",
+    "TeamEnforcer.PlayerForcedToCT": "{blue}{0}{default} foi forçado a entrar na equipa CT por {gold}{1}{default}.",
+    "TeamEnforcer.RemovedBecauseCTBanned": "{blue}{0}{default} foi removido porque está CTBanned.",
+    "TeamEnforcer.PlayerBanInfoPerm": "{blue}{0}{default} foi CTBanned {red}permanentemente{default} em {green}{1}{default} pelo staff {green}{2}{default}.",
+    "TeamEnforcer.PlayerBanInfoTemp": "{blue}{0}{default} foi CTBanned em {green}{1}{default} pelo staff {green}{2}{default} por {green}{3}{default} minutos. Tempo restante: {green}{4}{default} minutos.",
+    "TeamEnforcer.KickedFromCT": "Foste expulso da equipa CT, não podes juntar-te por mais {0} rondas."
 }
