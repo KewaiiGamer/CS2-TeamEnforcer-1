@@ -8,12 +8,18 @@ namespace TeamEnforcer;
 
 public partial class TeamEnforcer
 {
-    Dictionary<CCSPlayerController, DateTime> lastJoinAttempt = []; 
+    private readonly Dictionary<CCSPlayerController, DateTime> lastJoinAttempt = []; 
     public void RegisterListeners()
     {
         AddCommandListener("jointeam", OnJoinTeamCommand);
 
-        if (_teamManager != null) RegisterListener<Listeners.OnMapStart>(_teamManager.PrepareForNewMap);
+        if (_teamManager != null) 
+        {
+            RegisterListener<Listeners.OnMapStart>(_teamManager.PrepareForNewMap);
+            RegisterListener<Listeners.OnMapStart>((_) => {
+                lastJoinAttempt.Clear();
+            });
+        }
 
         _messageService?.PrintToConsole("Registered Listeners");
     }

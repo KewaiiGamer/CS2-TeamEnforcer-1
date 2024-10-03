@@ -12,6 +12,9 @@ public class TeamEnforcerConfig : BasePluginConfig
     [JsonPropertyName("RoundsInCtToLowPrio")]
     public int RoundsInCtToLowPrio { get; set; } = 2;
 
+    [JsonPropertyName("DefaultCTRatio")]
+    public float DefaultCTRatio { get; set; } = 0.25f; // 1 CT for every 4 players
+
     [JsonPropertyName("DatabaseHost")]
     public string DatabaseHost { get; set; } = "";
 

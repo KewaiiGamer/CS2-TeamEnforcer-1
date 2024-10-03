@@ -82,7 +82,7 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
             DbConnectionString = builder.ConnectionString;
             try {
                 Database = new Database(DbConnectionString, Logger);
-                _ctBanService = new(Database);
+                _ctBanService = new(Database, Logger);
                 _ctBanService.CreateTables();
             }
             catch (Exception ex)

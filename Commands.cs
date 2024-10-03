@@ -24,17 +24,12 @@ public partial class TeamEnforcer
         }
 
         Logger.LogInformation("[TeamEnforcer] {invoker} used !ct. Timestamp: {date}", invoker.PlayerName, DateTime.UtcNow);
-        
-        if (invoker.Team != CsTeam.Terrorist)
-        {
-            _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.CannotJoinQueueFromNotT"]);
-            return;
-        }
 
         var ctCount = Utilities.GetPlayers().FindAll(p => p != null && p.IsReal() && p.Team == CsTeam.CounterTerrorist).Count;
 
         var isCtBanned = _ctBanService?.PlayerIsCTBanned(invoker) ?? false;
-        if (ctCount == 0 && !isCtBanned)
+        var isCtKicked = _teamManager?.IsPlayerCTKicked(invoker) ?? false;
+        if (ctCount == 0 && !isCtBanned && !isCtKicked)
         {
             _teamManager?.PromoteToCt(invoker);
             _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.CtTeamEmptyInstantlyMoved"]);
@@ -73,6 +68,14 @@ public partial class TeamEnforcer
                 }
                 Server.NextFrame(() => {
                     invoker.PrintToChat(_messageService?.GetMessageString(Localizer["TeamEnforcer.CTBannedTempMessage", minutesLeft]) ?? $"You are currently CTBanned and cannot join the CT team. Your ban will expire in {minutesLeft} minutes");
+                });
+                return;
+            }
+
+            if (isCtKicked)
+            {
+                Server.NextFrame(() => {
+                    invoker.PrintToChat(_messageService?.GetMessageString(Localizer["TeamEnforcer.KickedFromCT", _teamManager?.GetKickDuration(invoker) ?? 0]) ?? "");
                 });
                 return;
             }

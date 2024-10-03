@@ -1,13 +1,15 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using Microsoft.Extensions.Logging;
 using MySqlConnector;
 using TeamEnforcer.Helpers;
 
 namespace TeamEnforcer.Services;
 
-public class CTBanService(Database db)
+public class CTBanService(Database db, ILogger logger)
 {
     private readonly Database _db = db;
+    private readonly ILogger _logger = logger;
 
     public void CreateTables()
     {
@@ -65,6 +67,9 @@ public class CTBanService(Database db)
 
         var id = Convert.ToInt32(await command.ExecuteScalarAsync());
 
+        _logger.LogInformation("[TeamEnforcer] Player {PlayerSteamId} CTBanned by {StaffSteamId}. Ban ID: {BanId}, Reason: {BanReason}, Expiration: {ExpirationDate}", 
+            newCtban.PlayerSteamId, newCtban.StaffSteamId, id, newCtban.BanReason, newCtban.ExpirationDate?.ToString() ?? "Never");
+
         return new ExistingCTBan
         {
             Id = id,
@@ -95,7 +100,8 @@ public class CTBanService(Database db)
         command.Parameters.AddWithValue("@unbanDate", DateTime.Now);
 
         await command.ExecuteNonQueryAsync();
-
+        _logger.LogInformation("[TeamEnforcer] Player with ban ID {BanId} CTUnbanned by {StaffSteamId}. Reason: {UnbanReason}", 
+            ctban.Id, staffSteamId, unbanReason);
         return new CTUnban
         {
             BanId = ctban.Id,

@@ -18,8 +18,6 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
     private readonly QueueManager _queueManager = queueManager;
     private readonly HashSet<CCSPlayerController> _noCtList = [];
     
-    private readonly double ctRatio = 0.25;
-
     private readonly Stack<CCSPlayerController> ctJoinOrder = [];
     private readonly HashSet<CCSPlayerController> legitCtJoins = [];
     private readonly List<CCSPlayerController> _leaveCtList = [];
@@ -27,6 +25,8 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
     private readonly List<ulong> _ctsThisMap = [];
     private List<ulong> _ctsLastMap = [];
     private readonly Dictionary<CCSPlayerController, int> _ctRoundCount = [];
+    private readonly Dictionary<string, int> _ctKickedPlayers = [];
+
 
     public void PrepareForNewMap(string mapName = "")
     {
@@ -39,6 +39,47 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         _ctsLastMap = new(_ctsThisMap);
         _ctsThisMap.Clear();
         _ctRoundCount.Clear();
+        _ctKickedPlayers.Clear();
+    }
+
+    public int GetKickDuration(CCSPlayerController player)
+    {
+        if (player == null || !player.IsReal()) return 0;
+        return _ctKickedPlayers.ContainsKey(player.SteamID.ToString()) ? _ctKickedPlayers[player.SteamID.ToString()] : 0;
+    }
+
+    public void KickPlayerFromCT(CCSPlayerController player, int duration)
+    {
+        if (player == null || !player.IsReal()) return;
+
+        _ctKickedPlayers[player.SteamID.ToString()] = duration;
+        DemoteToT(player);
+        _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.KickedFromCT", duration]);
+    }
+
+    public bool IsPlayerCTKicked(CCSPlayerController player)
+    {
+        if (player == null || !player.IsReal()) return false;
+        return _ctKickedPlayers.ContainsKey(player.SteamID.ToString());
+    }
+
+    public void DecrementCTKickDurations()
+    {
+        var playersToRemove = new List<string>();
+
+        foreach (var kvp in _ctKickedPlayers)
+        {
+            _ctKickedPlayers[kvp.Key]--;
+            if (_ctKickedPlayers[kvp.Key] <= 0)
+            {
+                playersToRemove.Add(kvp.Key);
+            }
+        }
+
+        foreach (var player in playersToRemove)
+        {
+            _ctKickedPlayers.Remove(player);
+        }
     }
     
     public void AddToLeaveList(CCSPlayerController? player)
@@ -84,6 +125,7 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
         int totalCtandT = players.FindAll(p => p.Team == CsTeam.Terrorist || p.Team == CsTeam.CounterTerrorist).Count;
         int ctCount = players.FindAll(p => p.Team == CsTeam.CounterTerrorist).Count;
 
+        float ctRatio = _plugin.Config.DefaultCTRatio;
         int idealCtCount = (int) (totalCtandT * ctRatio);
 
         if (idealCtCount <= 0) idealCtCount = 1;
@@ -300,7 +342,7 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
 
         if (team == CsTeam.Terrorist)
         {
-            teamsPlayers = teamsPlayers.FindAll(p => !_noCtList.Contains(p));
+            teamsPlayers = teamsPlayers.FindAll(p => !_noCtList.Contains(p) && !IsPlayerCTKicked(p));
         }
 
         var attempts = 0;

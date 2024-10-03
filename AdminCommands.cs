@@ -24,7 +24,7 @@ public partial class TeamEnforcer
     # endif
 
     [ConsoleCommand("css_ctbaninfo")]
-    [CommandHelper(minArgs: 1, usage: "<player_name> [duration] [reason]", whoCanExecute: CommandUsage.CLIENT_ONLY)]
+    [CommandHelper(minArgs: 1, usage: "<player_name> [duration] [reason]", whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
     [RequiresPermissions("@css/ban")]
     public void OnCTBanInfoCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
     {
@@ -60,11 +60,12 @@ public partial class TeamEnforcer
                     var notCtBannedMsg = _messageService?.GetMessageString(Localizer["TeamEnforcer.NotCTBanned", targetPlayer.PlayerName]) ?? fallbackMsg;
                     if (invoker != null)
                     {
-                        invoker?.PrintToChat(notCtBannedMsg);
-                        return;
+                        invoker.PrintToChat(notCtBannedMsg);
                     }
-
-                    Console.WriteLine(fallbackMsg);
+                    else
+                    {
+                        Console.WriteLine(fallbackMsg);
+                    }
                 });
                 return;
             }
@@ -76,31 +77,34 @@ public partial class TeamEnforcer
                 TimeSpan? timeLeft = expirationDate - DateTime.UtcNow;
                 TimeSpan? totalDuration = ctBanInfo.ExpirationDate - ctBanInfo.BanDate;
 
-                // Move the next frame logic to avoid clutter
                 Server.NextFrame(() => {
+                    string message;
                     if (expirationDate == null) // Permanent ban case
                     {
-                        _messageService?.PrintMessage(
-                            invoker, 
+                        message = _messageService?.GetMessageString(
                             Localizer["TeamEnforcer.PlayerBanInfoPerm", targetPlayer.PlayerName, ctBanInfo.BanDate, ctBanInfo.StaffSteamId]
-                        );
-                        return;
+                        ) ?? $"[TeamEnforcer] {targetPlayer.PlayerName} is permanently banned from CT. Ban date: {ctBanInfo.BanDate}, Staff: {ctBanInfo.StaffSteamId}";
+                    }
+                    else // Temporary ban case
+                    {
+                        double roundedTotalMinutes = Math.Round(totalDuration!.Value.TotalMinutes);
+                        double roundedMinutesLeft = Math.Round(timeLeft!.Value.TotalMinutes);
+                        message = _messageService?.GetMessageString(
+                            Localizer["TeamEnforcer.PlayerBanInfoTemp", targetPlayer.PlayerName, ctBanInfo.BanDate, 
+                            ctBanInfo.StaffSteamId, roundedTotalMinutes, roundedMinutesLeft]
+                        ) ?? $"[TeamEnforcer] {targetPlayer.PlayerName} is banned from CT. Ban date: {ctBanInfo.BanDate}, Staff: {ctBanInfo.StaffSteamId}, Total duration: {roundedTotalMinutes} minutes, Time left: {roundedMinutesLeft} minutes";
                     }
 
-                    // Temporary ban case
-                    double roundedTotalMinutes = Math.Round(totalDuration!.Value.TotalMinutes);
-                    double roundedMinutesLeft = Math.Round(timeLeft!.Value.TotalMinutes);
-
-                    _messageService?.PrintMessage(
-                        invoker, 
-                        Localizer["TeamEnforcer.PlayerBanInfoTemp", targetPlayer.PlayerName, ctBanInfo.BanDate, 
-                        ctBanInfo.StaffSteamId, roundedTotalMinutes, roundedMinutesLeft]
-                    );
+                    if (invoker != null)
+                    {
+                        invoker.PrintToChat(message);
+                    }
+                    else
+                    {
+                        Console.WriteLine(message);
+                    }
                 });
-
-                return;
             }
-
         });
     }
 
@@ -109,7 +113,6 @@ public partial class TeamEnforcer
     [RequiresPermissions("@css/ban")]
     public void OnCTBanCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
     {
-
         if (_ctBanService == null)
         {
             Logger.LogCritical("[TeamEnforcer] {invoker} attempted to use CTBan command but service was null.", invoker?.PlayerName ?? "Console");
@@ -131,11 +134,12 @@ public partial class TeamEnforcer
             return;
         }
 
-        Logger.LogInformation("[TeamEnforcer] {invoker} used !ctban, target: {target}. Timestamp: {date}", invoker?.PlayerName ?? "Console", targetPlayer.PlayerName, DateTime.UtcNow);
-
         var banDurationArg = uint.TryParse(commandInfo.ArgByIndex(2), out uint banDurationInt);
         var ctbanReason = commandInfo.ArgByIndex(3);
         if (ctbanReason == string.Empty) ctbanReason = "No reason provided.";
+
+        Logger.LogInformation("[TeamEnforcer] CTBan attempt - Invoker: {Invoker}, Target: {Target}, Duration: {Duration}, Reason: {Reason}", 
+            invoker?.PlayerName ?? "Console", targetPlayer.PlayerName, banDurationArg ? banDurationInt.ToString() : "Permanent", ctbanReason);
 
         Task.Run(async () => {
             bool isBannedAlready = await _ctBanService.PlayerIsCTBannedAsync(targetPlayer);
@@ -144,7 +148,14 @@ public partial class TeamEnforcer
             {
                 Server.NextFrame(() => {
                     var alreadyBannedMsg = _messageService?.GetMessageString(Localizer["TeamEnforcer.AlreadyBanned", targetPlayer.PlayerName]) ?? $"[TeamEnforcer] {targetPlayer.PlayerName} is already CTBanned.";
-                    invoker?.PrintToChat(alreadyBannedMsg);
+                    if (invoker != null)
+                    {
+                        invoker.PrintToChat(alreadyBannedMsg);
+                    }
+                    else
+                    {
+                        Console.WriteLine(alreadyBannedMsg);
+                    }
                 });
                 return;
             }
@@ -153,7 +164,15 @@ public partial class TeamEnforcer
             if (string.IsNullOrEmpty(targetSteamIdString))
             {
                 Server.NextFrame(() => {
-                    invoker?.PrintToChat("[TeamEnforcer] Error: Target player does not have a valid SteamID.");
+                    var errorMsg = "[TeamEnforcer] Error: Target player does not have a valid SteamID.";
+                    if (invoker != null)
+                    {
+                        invoker.PrintToChat(errorMsg);
+                    }
+                    else
+                    {
+                        Console.WriteLine(errorMsg);
+                    }
                 });
                 return;
             }
@@ -183,8 +202,16 @@ public partial class TeamEnforcer
             catch
             {
                 Server.NextFrame(() => {
-                    invoker?.PrintToChat("[TeamEnforcer] Error while banning player asynchronously");
-                    Logger.LogCritical("[TeamEnforcer] Error while banning player asynchronously");
+                    var errorMsg = "[TeamEnforcer] Error while banning player asynchronously";
+                    if (invoker != null)
+                    {
+                        invoker.PrintToChat(errorMsg);
+                    }
+                    else
+                    {
+                        Console.WriteLine(errorMsg);
+                    }
+                    Logger.LogCritical(errorMsg);
                 });
             }
         });
@@ -216,10 +243,12 @@ public partial class TeamEnforcer
             return;
         }
 
-        Logger.LogInformation("[TeamEnforcer] {invoker} used !ctunban, target: {target}. Timestamp: {date}", invoker?.PlayerName ?? "Console", targetPlayer.PlayerName, DateTime.UtcNow);
 
         var unbanReason = commandInfo.ArgByIndex(2);
         if (unbanReason == string.Empty) unbanReason = "No reason provided.";
+
+        Logger.LogInformation("[TeamEnforcer] CTUnban attempt - Invoker: {Invoker}, Target: {Target}, Reason: {Reason}", 
+            invoker?.PlayerName ?? "Console", targetPlayer.PlayerName, unbanReason);
 
         Task.Run(async () => {
             var isPlayerBanned = await _ctBanService.PlayerIsCTBannedAsync(targetPlayer);
@@ -232,10 +261,12 @@ public partial class TeamEnforcer
                     if (invoker != null)
                     {
                         var notCtBannedMsg = _messageService?.GetMessageString(Localizer["TeamEnforcer.NotCTBanned", targetPlayer.PlayerName]) ?? fallbackMsg;
-                        invoker?.PrintToChat(notCtBannedMsg);
-                        return;
+                        invoker.PrintToChat(notCtBannedMsg);
                     }
-                    Console.WriteLine(fallbackMsg);
+                    else
+                    {
+                        Console.WriteLine(fallbackMsg);
+                    }
                 });
                 return;
             }
@@ -252,8 +283,16 @@ public partial class TeamEnforcer
             catch
             {
                 Server.NextFrame(() => {
-                    invoker?.PrintToChat("[TeamEnforcer] Error while unbanning player asynchronously.");
-                    Logger.LogCritical("[TeamEnforcer] Error while unbanning player asynchronously.");
+                    var errorMsg = "[TeamEnforcer] Error while unbanning player asynchronously.";
+                    if (invoker != null)
+                    {
+                        invoker.PrintToChat(errorMsg);
+                    }
+                    else
+                    {
+                        Console.WriteLine(errorMsg);
+                    }
+                    Logger.LogCritical(errorMsg);
                 });
             }
         });
@@ -284,8 +323,9 @@ public partial class TeamEnforcer
             return;
         }
 
-        Logger.LogInformation("[TeamEnforcer] {invoker} used !ctunban, target: {target}. Timestamp: {date}", invoker?.PlayerName ?? "Console", targetPlayer.PlayerName, DateTime.UtcNow);
-
+        Logger.LogInformation("[TeamEnforcer] ForceMove to CT - Invoker: {Invoker}, Target: {Target}", 
+            invoker?.PlayerName ?? "Console", targetPlayer.PlayerName);
+            
         _teamManager.PromoteToCt(targetPlayer);
         _messageService?.PrintToAll(Localizer["TeamEnforcer.PlayerForcedToCT", targetPlayer.PlayerName, invoker?.PlayerName ?? "Console"]);
     }
@@ -315,6 +355,24 @@ public partial class TeamEnforcer
             commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.TargetNotFound", targetString]) ?? $"[TeamEnforcer] Unable to find target: {targetString}");
             return;
         }
-        // Logger.LogInformation("[TeamEnforcer] {invoker} used !ctkick, target: {target}. Timestamp: {date}", invoker?.PlayerName ?? "Console", targetPlayer.PlayerName, DateTime.UtcNow);
+    }
+
+    [ConsoleCommand("css_removequeue")]
+    [CommandHelper(minArgs: 1, usage: "<player_name>", whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
+    [RequiresPermissions("@css/generic")]
+    public void OnRemoveFromQueueCommand(CCSPlayerController? invoker, CommandInfo commandInfo) 
+    {
+        string targetString = commandInfo.ArgByIndex(1);
+        CCSPlayerController? targetPlayer = Utils.FindTarget(targetString);
+
+        if (targetPlayer == null || !targetPlayer.IsReal())
+        {
+            commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.TargetNotFound", targetString]) ?? $"[TeamEnforcer] Unable to find target: {targetString}");
+            return;
+        }
+
+        _queueManager?.LeaveQueue(targetPlayer);
+        commandInfo.ReplyToCommand($"Player {targetPlayer.PlayerName} has been removed from the queue.");
+        Logger.LogInformation("Player {Player} removed from queue by {Invoker}", targetPlayer.PlayerName, invoker?.PlayerName ?? "Console");
     }
 }
