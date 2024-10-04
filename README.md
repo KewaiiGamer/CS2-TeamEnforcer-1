@@ -62,7 +62,7 @@ Here are some planned features and improvements for the TeamEnforcer plugin:
 The plugin uses a JSON configuration file. Here are the main settings:
 
 ```json
-    {
+{
     "ChatMessagePrefix": " {DarkBlue}[{LightBlue}TeamEnforcer{DarkBlue}]{Default}",
     "RoundsInCtToLowPrio": 2,
     "DefaultCTRatio": 0.25,
@@ -71,7 +71,7 @@ The plugin uses a JSON configuration file. Here are the main settings:
     "DatabaseUser": "",
     "DatabasePassword": "",
     "DatabaseName": ""
-    }
+}
 ```
 
 Adjust these settings according to your server's needs.
