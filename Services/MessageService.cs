@@ -6,7 +6,7 @@ using TeamEnforcer.Helpers;
 
 namespace TeamEnforcer.Services;
 
-public class MessageService(string pluginPrefix)
+public class MessageService(string pluginPrefix = "[TeamEnforcer]")
 {
     public Dictionary<MsgType, char> messageColors = new()
     {
@@ -15,7 +15,7 @@ public class MessageService(string pluginPrefix)
         { MsgType.Error, ChatColors.Red }
     };
     
-    public readonly string PluginPrefix = pluginPrefix;
+    public string Prefix { get; set; } = pluginPrefix;
 
     public void PrintToConsole(string message)
     {
@@ -27,7 +27,7 @@ public class MessageService(string pluginPrefix)
     {
         if (player == null || !player.IsReal()) return;
         
-        var fullMessage = new StringBuilder(PluginPrefix)
+        var fullMessage = new StringBuilder(Prefix)
             .Append($" {messageColors.GetValueOrDefault(type, ChatColors.Default)}")
             .Append(message)
             .Append($"{ChatColors.Default}");
@@ -37,7 +37,7 @@ public class MessageService(string pluginPrefix)
 
     public string GetMessageString(string message, MsgType type = MsgType.Normal)
     {
-        var fullMessage = new StringBuilder(PluginPrefix)
+        var fullMessage = new StringBuilder(Prefix)
             .Append($" {messageColors.GetValueOrDefault(type, ChatColors.Default)}")
             .Append(message)
             .Append($"{ChatColors.Default}");
@@ -47,7 +47,7 @@ public class MessageService(string pluginPrefix)
 
     public void PrintToAll(string message, MsgType type = MsgType.Normal)
     {
-        var fullMessage = new StringBuilder(PluginPrefix)
+        var fullMessage = new StringBuilder(Prefix)
             .Append($" {messageColors.GetValueOrDefault(type, ChatColors.Default)}")
             .Append(message)
             .Append($"{ChatColors.Default}");

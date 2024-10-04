@@ -28,7 +28,7 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
     private readonly Dictionary<string, int> _ctKickedPlayers = [];
 
 
-    public void PrepareForNewMap(string mapName = "")
+    public void PrepareForNewMap()
     {
         _queueManager.ClearQueues();
         _noCtList.Clear();
@@ -54,7 +54,6 @@ public class TeamManager(QueueManager queueManager, MessageService messageServic
 
         _ctKickedPlayers[player.SteamID.ToString()] = duration;
         DemoteToT(player);
-        _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.KickedFromCT", duration]);
     }
 
     public bool IsPlayerCTKicked(CCSPlayerController player)
