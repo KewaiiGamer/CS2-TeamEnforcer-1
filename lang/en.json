@@ -40,5 +40,8 @@
     "TeamEnforcer.RemovedBecauseCTBanned": "{blue}{0}{default} was removed because they are CTBanned.",
     "TeamEnforcer.PlayerBanInfoPerm": "{blue}{0}{default} was {red}permanently{default} banned on {green}{1}{default} by staff {green}{2}{default}.",
     "TeamEnforcer.PlayerBanInfoTemp": "{blue}{0}{default} was banned on {green}{1}{default} by staff {green}{2}{default} for {green}{3}{default} minutes. Time left: {green}{4}{default} minutes.",
-    "TeamEnforcer.KickedFromCT": "You were kicked from the CT team, you cannot join for another {0} rounds."
+    "TeamEnforcer.KickedFromCT": "You were kicked from the CT team, you cannot join for another {0} rounds.",
+    "TeamEnforcer.PlayerForceRemovedFromQueue": "{blue}{0}{default} was forcefully removed from the queue by {gold}{1}{default}.",
+    "TeamEnforcer.AlreadyKicked": "{blue}{0}{default} is already kicked from the CT team.",
+    "TeamEnforcer.PlayerKickedFromCT": "{blue}{0}{default} was kicked from the CT team by {gold}{1}{default}."
 }

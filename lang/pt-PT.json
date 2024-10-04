@@ -40,5 +40,8 @@
     "TeamEnforcer.RemovedBecauseCTBanned": "{blue}{0}{default} foi removido porque está CTBanned.",
     "TeamEnforcer.PlayerBanInfoPerm": "{blue}{0}{default} foi CTBanned {red}permanentemente{default} em {green}{1}{default} pelo staff {green}{2}{default}.",
     "TeamEnforcer.PlayerBanInfoTemp": "{blue}{0}{default} foi CTBanned em {green}{1}{default} pelo staff {green}{2}{default} por {green}{3}{default} minutos. Tempo restante: {green}{4}{default} minutos.",
-    "TeamEnforcer.KickedFromCT": "Foste expulso da equipa CT, não podes juntar-te por mais {0} rondas."
+    "TeamEnforcer.KickedFromCT": "Foste expulso da equipa CT, não podes juntar-te por mais {0} rondas.",
+    "TeamEnforcer.PlayerForceRemovedFromQueue": "{blue}{0}{default} foi removido da fila por {gold}{1}{default}.",
+    "TeamEnforcer.AlreadyKicked": "{blue}{0}{default} já foi expulso da equipa CT.",
+    "TeamEnforcer.PlayerKickedFromCT": "{blue}{0}{default} foi expulso da equipa CT por {gold}{1}{default}."
 }

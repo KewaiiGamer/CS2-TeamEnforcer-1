@@ -1,16 +1,17 @@
 using System.Text;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
+using Microsoft.Extensions.Localization;
 using TeamEnforcer.Collections;
 using TeamEnforcer.Helpers;
 using TeamEnforcer.Services;
 
 namespace TeamEnforcer.Managers;
 
-public class QueueManager(MessageService messageService, TeamEnforcer plugin)
+public class QueueManager(MessageService messageService, IStringLocalizer localizer)
 {
     public readonly MessageService _messageService = messageService;
-    public readonly TeamEnforcer _plugin = plugin;
+    public readonly IStringLocalizer _localizer = localizer;
 
     private readonly CustomQueue<CCSPlayerController> _priorityQueue = new("Priority Queue");
     private readonly CustomQueue<CCSPlayerController> _mainQueue = new("Main Queue");
@@ -34,22 +35,22 @@ public class QueueManager(MessageService messageService, TeamEnforcer plugin)
 
         if (_priorityQueue.Contains(player) || _mainQueue.Contains(player) || _lowPriorityQueue.Contains(player)){
             IsPlayerInQueue(player, out var playerQueueStatus);
-            _messageService?.PrintMessage(player, _plugin.Localizer["TeamEnforcer.AlreadyInQueue", playerQueueStatus?.queuePosition ?? -1, playerQueueStatus?.queueName ?? "Unknown Queue"]);
+            _messageService.PrintMessage(player, _localizer["TeamEnforcer.AlreadyInQueue", playerQueueStatus?.queuePosition ?? -1, playerQueueStatus?.queueName ?? "Unknown Queue"]);
             return;
         }
         switch(prio)
         {
             case QueuePriority.High:
                 _priorityQueue.Enqueue(player);
-                _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.AddedToPriorityQueue"]);
+                _messageService.PrintMessage(player, _localizer["TeamEnforcer.AddedToPriorityQueue"]);
                 break;
             case QueuePriority.Low:
                 _lowPriorityQueue.Enqueue(player);
-                _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.AddedToLowPriorityQueue"]);
+                _messageService.PrintMessage(player, _localizer["TeamEnforcer.AddedToLowPriorityQueue"]);
                 break;
             default:
                 _mainQueue.Enqueue(player);
-                _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.JoinedQueue"]);
+                _messageService.PrintMessage(player, _localizer["TeamEnforcer.JoinedQueue"]);
                 break;
         }
     }
@@ -71,7 +72,7 @@ public class QueueManager(MessageService messageService, TeamEnforcer plugin)
             }
         }
 
-        _messageService.PrintMessage(player, _plugin.Localizer["TeamEnforcer.RemovedFromQueue"]);
+        _messageService.PrintMessage(player, _localizer["TeamEnforcer.RemovedFromQueue"]);
     }
 
     public bool IsPlayerInQueue(CCSPlayerController? player, out PlayerQueueStatus? status)
@@ -130,7 +131,7 @@ public class QueueManager(MessageService messageService, TeamEnforcer plugin)
     public string GetQueueStatus()
     {
         // Assumes queue isnt empty, command checks that
-        var statusMessage = new StringBuilder(_plugin.Localizer["TeamEnforcer.PlayersInQueueLiteral"]);
+        var statusMessage = new StringBuilder(_localizer["TeamEnforcer.PlayersInQueueLiteral"]);
         int count = 1;
         if (_mainQueue.Count == 0 && _lowPriorityQueue.Count == 0 && _priorityQueue.Count == 0) return "";
 

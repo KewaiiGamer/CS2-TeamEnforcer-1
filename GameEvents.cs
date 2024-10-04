@@ -10,6 +10,7 @@ public partial class TeamEnforcer
     public HookResult OnRoundStart(EventRoundStart @event, GameEventInfo eventInfo)
     {
         _teamManager?.UpdateMapCtList();
+        _teamManager?.DecrementCTKickDurations();
         return HookResult.Continue;
     }
     

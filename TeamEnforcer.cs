@@ -12,11 +12,11 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
 {
     public override string ModuleName => "TeamEnforcer";
     public override string ModuleVersion => "v1.0.0";
-    public override string ModuleAuthor => "menn (github.com/yMenn/)";
+    public override string ModuleAuthor => "menn (github.com/yMenn)";
 
     public TeamEnforcerConfig Config { get; set; } = new();
 
-    private MessageService? _messageService;
+    private MessageService _messageService = new();
     private QueueManager? _queueManager;
     private TeamManager? _teamManager;
     private CTBanService? _ctBanService;
@@ -40,7 +40,7 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
 
             cvar.SetValue(false);
 
-            _messageService?.PrintToConsole("Convar 'mp_autoteambalance' has been set to 'false'");
+            _messageService.PrintToConsole("Convar 'mp_autoteambalance' has been set to 'false'");
         });
 
         Console.WriteLine("[TeamEnforcer] Loaded plugin.");
@@ -88,14 +88,14 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
             }
             catch (Exception ex)
             {
-                Console.WriteLine("[TeamEnforcer] An error occured while obtaining database instance. Message: {msg}", ex);
+                Console.WriteLine("[TeamEnforcer] An error occured while obtaining database instance. Message: {0}", ex.ToString());
             }
         }
 
         Config = config;
+        _messageService.Prefix = Config.ChatMessagePrefix;
 
-        _messageService = new(Config.ChatMessagePrefix);
-        _queueManager = new(_messageService, this);
+        _queueManager = new(_messageService, Localizer);
         _teamManager = new(_queueManager, _messageService, this, _ctBanService);
 
         Console.WriteLine("[TeamEnforcer] Services and managers instanced.");

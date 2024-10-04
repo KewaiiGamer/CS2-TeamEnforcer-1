@@ -15,13 +15,13 @@ public partial class TeamEnforcer
 
         if (_teamManager != null) 
         {
-            RegisterListener<Listeners.OnMapStart>(_teamManager.PrepareForNewMap);
             RegisterListener<Listeners.OnMapStart>((_) => {
+                _teamManager.PrepareForNewMap();
                 lastJoinAttempt.Clear();
             });
         }
 
-        _messageService?.PrintToConsole("Registered Listeners");
+        _messageService.PrintToConsole("Registered Listeners");
     }
 
     public HookResult OnJoinTeamCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
@@ -33,7 +33,7 @@ public partial class TeamEnforcer
             // Allow only every 3 seconds so no sound and chat spam.
             if (!lastJoinAttempt.TryGetValue(invoker, out DateTime value) || DateTime.Now > value.AddSeconds(3))
             {
-                _messageService?.PrintMessage(
+                _messageService.PrintMessage(
                     invoker,
                     Localizer["TeamEnforcer.CannotJoinCt", $"{ChatColors.Blue}!guard{ChatColors.Default}"]
                 );
@@ -52,7 +52,7 @@ public partial class TeamEnforcer
                 if (_teamManager?.IsInLeaveList(invoker) ?? false)
                 {
                     invoker.ExecuteClientCommand($"play sounds/ui/menu_invalid.vsnd_c");
-                    _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.AlreadyInLeaveList"]);
+                    _messageService.PrintMessage(invoker, Localizer["TeamEnforcer.AlreadyInLeaveList"]);
                 }
                 else
                 {

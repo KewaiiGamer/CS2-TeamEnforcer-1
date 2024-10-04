@@ -19,7 +19,7 @@ public partial class TeamEnforcer
         
         if (invoker.Team != CsTeam.Terrorist)
         {
-            _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.CannotJoinQueueFromNotT"]);
+            _messageService.PrintMessage(invoker, Localizer["TeamEnforcer.CannotJoinQueueFromNotT"]);
             return;
         }
 
@@ -32,13 +32,19 @@ public partial class TeamEnforcer
         if (ctCount == 0 && !isCtBanned && !isCtKicked)
         {
             _teamManager?.PromoteToCt(invoker);
-            _messageService?.PrintMessage(invoker, Localizer["TeamEnforcer.CtTeamEmptyInstantlyMoved"]);
+            _messageService.PrintMessage(invoker, Localizer["TeamEnforcer.CtTeamEmptyInstantlyMoved"]);
+            return;
+        }
+
+        if (isCtKicked)
+        {
+            _messageService.PrintMessage(invoker, Localizer["TeamEnforcer.KickedFromCT", _teamManager?.GetKickDuration(invoker) ?? 0]);
             return;
         }
 
         if (_ctBanService == null)
         {
-            var queuePrio = _teamManager?.WasCtLastMap(invoker)?? false ? Managers.QueuePriority.Low : Managers.QueuePriority.Normal;
+            var queuePrio = _teamManager?.WasCtLastMap(invoker) ?? false ? Managers.QueuePriority.Low : Managers.QueuePriority.Normal;
             _queueManager?.JoinQueue(invoker, queuePrio);
             return;
         }
@@ -55,7 +61,7 @@ public partial class TeamEnforcer
                 if (banIsPermanent)
                 {
                     Server.NextFrame(() => {
-                        invoker.PrintToChat(_messageService?.GetMessageString(Localizer["TeamEnforcer.CTBannedPermMessage"]) ?? "[TeamEnforcer] You are permanently banned from CT so you cannot join the queue.");
+                        invoker.PrintToChat(_messageService.GetMessageString(Localizer["TeamEnforcer.CTBannedPermMessage"]));
                     });
                     return;
                 }
@@ -67,7 +73,7 @@ public partial class TeamEnforcer
                     minutesLeft = Math.Max(0, (int)Math.Round(timeLeft.Value.TotalMinutes));
                 }
                 Server.NextFrame(() => {
-                    invoker.PrintToChat(_messageService?.GetMessageString(Localizer["TeamEnforcer.CTBannedTempMessage", minutesLeft]) ?? $"You are currently CTBanned and cannot join the CT team. Your ban will expire in {minutesLeft} minutes");
+                    invoker.PrintToChat(_messageService.GetMessageString(Localizer["TeamEnforcer.CTBannedTempMessage", minutesLeft]));
                 });
                 return;
             }
@@ -75,13 +81,13 @@ public partial class TeamEnforcer
             if (isCtKicked)
             {
                 Server.NextFrame(() => {
-                    invoker.PrintToChat(_messageService?.GetMessageString(Localizer["TeamEnforcer.KickedFromCT", _teamManager?.GetKickDuration(invoker) ?? 0]) ?? "");
+                    invoker.PrintToChat(_messageService.GetMessageString(Localizer["TeamEnforcer.KickedFromCT", _teamManager?.GetKickDuration(invoker) ?? 0]));
                 });
                 return;
             }
 
             Server.NextFrame(() => {
-                var queuePrio = _teamManager?.WasCtLastMap(invoker)?? false ? Managers.QueuePriority.Low : Managers.QueuePriority.Normal;
+                var queuePrio = _teamManager?.WasCtLastMap(invoker) ?? false ? Managers.QueuePriority.Low : Managers.QueuePriority.Normal;
                 _queueManager?.JoinQueue(invoker, queuePrio);
             });
             return;
@@ -107,7 +113,7 @@ public partial class TeamEnforcer
 
         if (invoker.Team == CsTeam.CounterTerrorist)
         {
-            commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.MustBeT"]) ?? "");
+            commandInfo.ReplyToCommand(_messageService.GetMessageString(Localizer["TeamEnforcer.MustBeT"]));
             return;
         }
 
@@ -130,7 +136,7 @@ public partial class TeamEnforcer
 
         if (!_queueManager?.IsPlayerInQueue(invoker, out var _) ?? true)
         {
-            commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.NotInQueue"]) ?? "");
+            commandInfo.ReplyToCommand(_messageService.GetMessageString(Localizer["TeamEnforcer.NotInQueue"]));
             return;
         }
         Logger.LogInformation("[TeamEnforcer] {invoker} used !leavequeue. Timestamp: {date}", invoker.PlayerName, DateTime.UtcNow);
@@ -146,17 +152,17 @@ public partial class TeamEnforcer
         // Print position if invoker in queue
         if (_queueManager?.IsQueueEmpty() ?? true)
         {
-            commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.QueueEmpty", "!guard"]) ?? "");
+            commandInfo.ReplyToCommand(_messageService.GetMessageString(Localizer["TeamEnforcer.QueueEmpty", "!guard"]));
             return;
         }
 
         if (_queueManager.IsPlayerInQueue(invoker, out var playerQueueStatus))
         {
-            commandInfo.ReplyToCommand(_messageService?.GetMessageString(Localizer["TeamEnforcer.YourPlaceInQueue", playerQueueStatus?.queuePosition ?? -1]) ?? "");
+            commandInfo.ReplyToCommand(_messageService.GetMessageString(Localizer["TeamEnforcer.YourPlaceInQueue", playerQueueStatus?.queuePosition ?? -1]));
         }
 
         var queueStatus = _queueManager?.GetQueueStatus();
         
-        commandInfo.ReplyToCommand(_messageService?.GetMessageString(queueStatus ?? "") ?? "");
+        commandInfo.ReplyToCommand(_messageService.GetMessageString(queueStatus ?? ""));
     }
 }
