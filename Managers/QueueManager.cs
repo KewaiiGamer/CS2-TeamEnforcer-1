@@ -54,6 +54,7 @@ public class QueueManager(MessageService messageService, TeamEnforcer plugin)
         }
     }
 
+
     public void LeaveQueue(CCSPlayerController? player)
     {
         if (player == null || !player.IsReal()) return;
