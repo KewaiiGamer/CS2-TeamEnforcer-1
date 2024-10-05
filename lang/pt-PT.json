@@ -10,7 +10,7 @@
     "TeamEnforcer.AddedToPriorityQueue": "Foste adicionado à fila prioritária.",
     "TeamEnforcer.RandomTPromoted" : "{blue}{0}{default} foi escolhido aleatoriamente para ser movido para CT.",
     "TeamEnforcer.TPromotedFromQueue" : "{blue}{0}{default} foi escolhido da fila para ser movido para CT.",
-    "TeamEnforcer.NotEnoughTsAvailable": "Não foi possível encontrar Ts suficientes para juntar-se à CT. O equilíbrio das equipas está desequilibrado.",
+    "TeamEnforcer.NotEnoughTsAvailable": "Não foi possível encontrar Ts suficientes para juntar-se a CT. As equipas estão desequilibradas.",
     "TeamEnforcer.PlayerDemotedJoinedIllegitimately": "{blue}{0}{default} foi removido da CT porque não entrou por meios legítimos.",
     "TeamEnforcer.PlayerDemotedFromStack": "Há demasiados CTs, {0} foi o último CT a juntar-se e foi escolhido para ser removido de volta para T.",
     "TeamEnforcer.DemotedFromLeaversList": "Foste removido da CT porque usaste o comando {0}.",
