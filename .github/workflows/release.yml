@@ -1,9 +1,12 @@
 name: Build, Package, and Release
 
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
+    inputs:
+      build_description:
+        description: 'Description of this build'
+        required: true
+        default: 'New release'
 
 jobs:
   release:
@@ -19,7 +22,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '6.0.x' # Adjust this to your project's .NET version
+          dotnet-version: '8.0.x' # Adjust this to your project's .NET version
 
       - name: Get latest release
         id: get_latest_release
@@ -74,6 +77,7 @@ jobs:
         with:
           tag_name: ${{ steps.new_version.outputs.NEW_VERSION }}
           release_name: Release ${{ steps.new_version.outputs.NEW_VERSION }}
+          body: ${{ github.event.inputs.build_description }}
           draft: false
           prerelease: false
 
