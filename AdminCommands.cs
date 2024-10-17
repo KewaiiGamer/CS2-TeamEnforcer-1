@@ -24,7 +24,7 @@ public partial class TeamEnforcer
     # endif
 
     [ConsoleCommand("css_ctbaninfo")]
-    [CommandHelper(minArgs: 1, usage: "<player_name> [duration] [reason]", whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
+    [CommandHelper(minArgs: 1, usage: "<player_name>", whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
     [RequiresPermissions("@css/ban")]
     public void OnCTBanInfoCommand(CCSPlayerController? invoker, CommandInfo commandInfo)
     {
@@ -197,6 +197,7 @@ public partial class TeamEnforcer
                         ?? $"[TeamEnforcer] {targetPlayer.PlayerName} was CTBanned. Duration: {durationString}"
                     );
                     _teamManager?.DemoteToT(targetPlayer);
+                    _queueManager?.LeaveQueue(targetPlayer);
                 });
             }
             catch
