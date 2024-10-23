@@ -75,7 +75,7 @@ public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig
                 Port = (uint)config.DatabasePort,
                 Pooling = true,
                 MinimumPoolSize = 0,
-                MaximumPoolSize = 640,
+                MaximumPoolSize = 10,
             };
 
             Console.WriteLine("[TeamEnforcer] Connecting to database.");
