@@ -11,7 +11,7 @@ namespace TeamEnforcer;
 public partial class TeamEnforcer : BasePlugin, IPluginConfig<TeamEnforcerConfig>
 {
     public override string ModuleName => "TeamEnforcer";
-    public override string ModuleVersion => "v1.0.5";
+    public override string ModuleVersion => "v1.0.6";
     public override string ModuleAuthor => "Kewaii. Original by menn (github.com/yMenn)";
 
     public TeamEnforcerConfig Config { get; set; } = new();
