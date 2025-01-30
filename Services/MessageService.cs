@@ -3,6 +3,7 @@ using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using TeamEnforcer.Helpers;
+using System.Text.RegularExpressions;
 
 namespace TeamEnforcer.Services;
 
@@ -29,7 +30,7 @@ public class MessageService(string pluginPrefix = "[TeamEnforcer]")
         
         var fullMessage = new StringBuilder(Prefix)
             .Append($" {messageColors.GetValueOrDefault(type, ChatColors.Default)}")
-            .Append(message)
+            .Append(ReplaceTags(message))
             .Append($"{ChatColors.Default}");
 
         player.PrintToChat(fullMessage.ToString());
@@ -39,7 +40,7 @@ public class MessageService(string pluginPrefix = "[TeamEnforcer]")
     {
         var fullMessage = new StringBuilder(Prefix)
             .Append($" {messageColors.GetValueOrDefault(type, ChatColors.Default)}")
-            .Append(message)
+            .Append(ReplaceTags(message))
             .Append($"{ChatColors.Default}");
 
         return fullMessage.ToString();
@@ -49,10 +50,34 @@ public class MessageService(string pluginPrefix = "[TeamEnforcer]")
     {
         var fullMessage = new StringBuilder(Prefix)
             .Append($" {messageColors.GetValueOrDefault(type, ChatColors.Default)}")
-            .Append(message)
-            .Append($"{ChatColors.Default}");
+            .Append(ReplaceTags(message))
+            .Append($"{ChatColors.Default}") ;
 
         Server.PrintToChatAll(fullMessage.ToString());
+    }
+    public string ReplaceTags(string text)
+    {
+        text = Regex.Replace(text, "{DEFAULT}", $"{ChatColors.Default}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{WHITE}", $"{ChatColors.White}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{DARKRED}", $"{ChatColors.DarkRed}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{GREEN}", $"{ChatColors.Green}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{LIGHTYELLOW}", $"{ChatColors.LightYellow}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{LIGHTBLUE}", $"{ChatColors.LightBlue}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{OLIVE}", $"{ChatColors.Olive}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{LIME}", $"{ChatColors.Lime}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{RED}", $"{ChatColors.Red}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{PURPLE}", $"{ChatColors.Purple}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{GREY}", $"{ChatColors.Grey}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{YELLOW}", $"{ChatColors.Yellow}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{GOLD}", $"{ChatColors.Gold}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{SILVER}", $"{ChatColors.Silver}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{BLUE}", $"{ChatColors.Blue}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{DARKBLUE}", $"{ChatColors.DarkBlue}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{BLUEGREY}", $"{ChatColors.BlueGrey}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{MAGENTA}", $"{ChatColors.Magenta}", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, "{LIGHTRED}", $"{ChatColors.LightRed}", RegexOptions.IgnoreCase);
+
+	    return text;
     }
 }
 
@@ -61,4 +86,4 @@ public enum MsgType
     Normal,
     Warning,
     Error
-}
+} 
