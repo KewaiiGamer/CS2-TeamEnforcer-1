@@ -35,7 +35,7 @@ public partial class TeamEnforcer
             {
                 _messageService.PrintMessage(
                     invoker,
-                    Localizer["TeamEnforcer.CannotJoinCt", $"{ChatColors.Blue}!guard{ChatColors.Default}"]
+                    Localizer["TeamEnforcer.CannotJoinCt", $"!guard"]
                 );
                 invoker.ExecuteClientCommand($"play sounds/ui/menu_invalid.vsnd_c");
             }

@@ -28,7 +28,7 @@ public class MessageService(string pluginPrefix = "[TeamEnforcer]")
     {
         if (player == null || !player.IsReal()) return;
         
-        var fullMessage = new StringBuilder(Prefix)
+        var fullMessage = new StringBuilder(ReplaceTags(Prefix))
             .Append($" {messageColors.GetValueOrDefault(type, ChatColors.Default)}")
             .Append(ReplaceTags(message))
             .Append($"{ChatColors.Default}");
@@ -38,7 +38,7 @@ public class MessageService(string pluginPrefix = "[TeamEnforcer]")
 
     public string GetMessageString(string message, MsgType type = MsgType.Normal)
     {
-        var fullMessage = new StringBuilder(Prefix)
+        var fullMessage = new StringBuilder(ReplaceTags(Prefix))
             .Append($" {messageColors.GetValueOrDefault(type, ChatColors.Default)}")
             .Append(ReplaceTags(message))
             .Append($"{ChatColors.Default}");
@@ -48,7 +48,7 @@ public class MessageService(string pluginPrefix = "[TeamEnforcer]")
 
     public void PrintToAll(string message, MsgType type = MsgType.Normal)
     {
-        var fullMessage = new StringBuilder(Prefix)
+        var fullMessage = new StringBuilder(ReplaceTags(Prefix))
             .Append($" {messageColors.GetValueOrDefault(type, ChatColors.Default)}")
             .Append(ReplaceTags(message))
             .Append($"{ChatColors.Default}") ;

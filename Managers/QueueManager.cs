@@ -142,7 +142,7 @@ public class QueueManager(MessageService messageService, IStringLocalizer locali
         foreach (var player in allPlayers)
         {
             if (player == null || !player.IsReal()) continue;
-            statusMessage.Append($"\u2029{ChatColors.Green}#{count}{ChatColors.Default} - {player.PlayerName ?? "<John Doe>"}");
+            statusMessage.Append($"\u2029#{count} - {player.PlayerName ?? "<John Doe>"}");
             count++;
         }
 
